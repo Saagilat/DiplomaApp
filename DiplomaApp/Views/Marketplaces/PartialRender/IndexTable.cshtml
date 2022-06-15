@@ -1,0 +1,44 @@
+﻿@model X.PagedList.PagedList<DiplomaApp.Models.Marketplace>
+@using X.PagedList.Mvc.Core;
+@{
+        var query = Context.Request.Query;
+}
+<div class="mt-3 mb-3">
+ @Html.PagedListPager(Model, page => (Url.Action(ViewContext.RouteData.Values["action"].ToString(), 
+ new {
+     id=ViewContext.RouteData.Values["id"],
+     page=page})),
+ new X.PagedList.Web.Common.PagedListRenderOptions {
+     LiElementClasses = new string[] { "page-item" },
+     PageClasses = new string[] { "page-link" }
+ })
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>
+                URL
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null)
+        {
+            foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        <a href=@item.UrlBase>@Html.DisplayFor(modelItem => item.UrlBase)</a>
+                    </td>
+                    <td>
+                        <a asp-controller="Marketplaces" asp-action="Details" asp-route-id="@item.Id">Просмотреть</a>
+                        <a asp-controller="Marketplaces" asp-action="Edit" asp-route-id="@item.Id">Изменить</a>
+                        <a asp-controller="Marketplaces" asp-action="Delete" asp-route-id="@item.Id">Удалить</a>
+                        <a asp-controller="Marketplaces" asp-action="GetOffers" asp-route-id="@item.Id">Обновить предложения</a>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+</div>

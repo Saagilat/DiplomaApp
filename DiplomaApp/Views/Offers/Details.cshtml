@@ -1,0 +1,19 @@
+﻿@model DiplomaApp.ViewModels.OfferDetails
+
+@{
+    ViewData["Title"] = Model.Offer.Name;
+}
+
+<div>
+    @{ Html.RenderPartial("~/Views/Offers/PartialRender/DetailsForm.cshtml", Model); }
+</div>
+<div>
+    @{ Html.RenderPartial("~/Views/Offers/PartialRender/PriceChart.cshtml", Model); }
+</div>
+<div>
+    <h2>Похожие предложения</h2>
+    @{ Html.RenderPartial("~/Views/Offers/PartialRender/IndexTable.cshtml", Model.SimilliarOffers); }
+</div>
+<div>
+    <a asp-action="Index">Назад к списку</a>
+</div>

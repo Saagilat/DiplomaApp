@@ -1,0 +1,13 @@
+﻿@model X.PagedList.IPagedList<DiplomaApp.ViewModels.OfferIndex>
+
+@{
+    ViewData["Title"] = "Товары";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div>
+    @{ Html.RenderPartial("~/Views/Offers/PartialRender/IndexTable.cshtml", Model); }
+</div>
+
+

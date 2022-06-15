@@ -1,0 +1,15 @@
+﻿@model IEnumerable<DiplomaApp.Models.Marketplace>
+
+@{
+    ViewData["Title"] = "Маркетплейсы";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<p>
+    <a asp-action="Create">Добавить</a>
+</p>
+
+<div>
+    @{ Html.RenderPartial("~/Views/Marketplaces/PartialRender/IndexTable.cshtml", Model); }
+</div>

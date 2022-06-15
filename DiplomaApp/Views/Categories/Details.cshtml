@@ -1,0 +1,20 @@
+﻿@model DiplomaApp.ViewModels.CategoryDetails
+
+@{
+    ViewData["Title"] = @Model.Category.Name;
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div>
+    <h4>Category</h4>
+    <hr />
+    @{ Html.RenderPartial("~/Views/Categories/PartialRender/DetailsForm.cshtml", Model.Category); }
+    <a asp-controller="Categories" asp-action="GetOffers" asp-route-id="@Model.Category.Id">Обновить предложения</a>
+</div>
+<div>
+    @{ Html.RenderPartial("~/Views/Offers/PartialRender/IndexTable.cshtml", Model.Offers); }
+</div>
+<div>
+    <a asp-controller="Categories" asp-action="Index">Назад к списку</a>
+</div>

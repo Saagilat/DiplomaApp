@@ -1,0 +1,125 @@
+﻿@model X.PagedList.PagedList<DiplomaApp.ViewModels.OfferIndex>
+@using X.PagedList.Mvc.Core;
+
+@{
+        var query = Context.Request.Query;
+        var currentMinPrice = query["minPrice"].ToString() == "" ? ViewData["MinPrice"] : query["minPrice"];
+        var currentMaxPrice = query["maxPrice"].ToString() == "" ? ViewData["MaxPrice"] : query["maxPrice"];
+        var currentCategory = query["category"].ToString() == "" ? ViewData["Category"] : query["category"];
+        var currentMarketplace = query["marketplace"].ToString() == "" ? ViewData["Marketplace"] : query["marketplace"];
+        var currentName = query["name"].ToString() == "" ? ViewData["Name"] : query["name"];
+}
+<div class="mb-3 mt-3">
+    <form>
+        <div class="row mt-3">
+            <div class="col">
+                <input type="text" class="form-control" id="minPrice" name="minPrice" placeholder="от @ViewData["MinPrice"]">
+            </div>
+            <div class="col">
+                <input type="text" class="form-control" id="maxPrice" name="maxPrice" placeholder="до @ViewData["MaxPrice"]">
+            </div>
+        </div>
+        <input type="text" class="form-control mt-3" id="name" name="name" value="@currentName" placeholder="Название">
+        <input type="text" class="form-control mt-3" id="category" name="category" value="@currentCategory" placeholder="Категория">
+        <input type="text" class="form-control mt-3" id="marketplace" name="marketplace" value="@currentMarketplace" placeholder="Маркетплейс">
+        <select class="form-control mt-3" name="order" >
+            <option disabled selected>Сортировка</option>
+            <option value="name-asc">Название возростание</option>
+            <option value="name-desc">Название убывание</option>
+            <option value="price-asc">Цена возростание</option>
+            <option value="price-desc">Цена убывание</option>
+            <option value="checkdate-asc">Дата проверки возростание</option>
+            <option value="checkdate-desc">Дата проверки убывание</option>
+        </select>
+        <input class="form-control mt-3" type="submit" value="Найти" />
+    </form>
+    <div class="mt-3">
+        @Html.PagedListPager(Model, page => 
+            (Url.Action(ViewContext.RouteData.Values["action"].ToString(), 
+            new {
+                id=ViewContext.RouteData.Values["id"],
+                page=page, category=query["category"],
+                name=query["name"],
+                minPrice=query["minPrice"],
+                maxPrice=query["maxPrice"],
+                order=query["order"], 
+                marketplace=query["marketplace"]})), 
+            new X.PagedList.Web.Common.PagedListRenderOptions {
+                LiElementClasses = new string[] { "page-item" },
+                PageClasses = new string[] { "page-link" }
+        })
+    </div>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>
+                    Товар
+                </th>
+                <th>
+                    Категория
+                </th>
+                <th>
+                    Маркетплейс
+                </th>
+                <th>
+                    Цена
+                </th>
+                <th>
+                    Дата проверки
+                </th>
+                <th>
+                    URL
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+        @if (Model != null)
+            {
+                foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            <a asp-controller="Offers" asp-action="Details" asp-route-id="@item.Offer.Id">@Html.DisplayFor(modelItem => item.Offer.Name)</a>
+                        </td>
+                        <td>
+                            <a asp-controller="Offers" asp-action="Index" asp-route-category="@item.CategoryName">@Html.DisplayFor(modelItem => item.CategoryName)</a>
+                        </td>
+                        <td>
+                            <a asp-controller="Offers" asp-action="Index" asp-route-marketplace="@item.MarketplaceName">@Html.DisplayFor(modelItem => item.MarketplaceName)</a>
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Offer.Price)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Offer.CheckDate)
+                        </td>
+                        <td>
+                            <a href=@item.Offer.Url>@Html.DisplayFor(modelItem => item.Offer.Url)</a>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+    <div class="mt-3">
+        @Html.PagedListPager(Model, page => 
+            (Url.Action(ViewContext.RouteData.Values["action"].ToString(), 
+            new {
+                id=ViewContext.RouteData.Values["id"],
+                page=page, category=query["category"],
+                name=query["name"],
+                minPrice=query["minPrice"],
+                maxPrice=query["maxPrice"],
+                order=query["order"], 
+                marketplace=query["marketplace"]})), 
+            new X.PagedList.Web.Common.PagedListRenderOptions {
+                LiElementClasses = new string[] { "page-item" },
+                PageClasses = new string[] { "page-link" }
+        })
+    </div>
+</div>
+<script>
+    function updateValue(id, value) {
+          document.getElementById(id).value=value; 
+        }
+</script>
