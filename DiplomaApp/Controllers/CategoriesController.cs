@@ -26,7 +26,7 @@ namespace DiplomaApp.Controllers
         }
 
         // GET: Categories
-        public async Task<IActionResult> Index(int page=1)
+        public async Task<IActionResult> Index(string name, string marketplace, int page=1)
         {
 
             if (_context == null)
@@ -34,8 +34,23 @@ namespace DiplomaApp.Controllers
                 return Problem("Entity set 'ApplicationDbContext.Category'  is null.");
             }
 
-            var categoriesPage = _context.Category.OrderBy(c => c.Name).ToPagedList(page, Constants.recordsPerPage);
-            return View(categoriesPage);
+            var categories = _context.Category.AsEnumerable();
+            if(!String.IsNullOrEmpty(name))
+            {
+                categories = categories.Where(c => c.Name.ToLower().Contains(name.ToLower()));
+            }
+            if (!String.IsNullOrEmpty(marketplace))
+            {
+                categories = categories.Where(c => _context.Marketplace.Find(c.MarketplaceId).Name.ToLower().Contains(marketplace.ToLower()));
+            }
+            List<CategoryIndex> categoryIndexes = new List<CategoryIndex>();
+            foreach(var category in categories)
+            {
+                var categoryMarketplace = _context.Marketplace.Find(category.MarketplaceId);
+                categoryIndexes.Add(new CategoryIndex() { Category = category, MarketplaceName = categoryMarketplace.Name, MarketplaceUrl = categoryMarketplace.Url });
+            }
+            var viewModel = categoryIndexes.ToPagedList(page, Constants.recordsPerPage);
+            return View(viewModel);
         }
         // GET: Categories/Details/5
         public async Task<IActionResult> Details(int id, string name, int minPrice, int maxPrice, int page = 1, string order = "checkdate-desc", int similiarityRatio = Constants.defaultSimiliarityRatio)
@@ -51,15 +66,12 @@ namespace DiplomaApp.Controllers
                 return NotFound();
             }
             var viewModel = new CategoryDetails();
-            viewModel.Category = category;
             var offers = _context.Offer.Where(c => c.CategoryId == id).AsEnumerable();
             if (offers.Any())
             {
                 ViewData["MinPrice"] = offers.Min(c => c.Price);
                 ViewData["MaxPrice"] = offers.Max(c => c.Price);
             }
-            ViewData["Category"] = category.Name;
-            ViewData["Marketplace"] = _context.Marketplace.Find(category.MarketplaceId).Name;
             if (maxPrice != 0)
             {
                 offers = offers.Where(c => (c.Price <= maxPrice));
@@ -102,6 +114,9 @@ namespace DiplomaApp.Controllers
             {
                 offerIndexes.Add(new OfferIndex { Offer = item, CategoryName = _context.Category.Find(item.CategoryId).Name, MarketplaceName = _context.Marketplace.Find(_context.Category.Find(item.CategoryId).MarketplaceId).Name });
             }
+            viewModel.Category = category;
+            viewModel.MarketplaceName = _context.Marketplace.Find(category.MarketplaceId).Name;
+            viewModel.MarketplaceUrl = _context.Marketplace.Find(category.MarketplaceId).Url;
             viewModel.Offers = offerIndexes.ToPagedList(page, Constants.recordsPerPage);
 
             return View(viewModel);
@@ -139,68 +154,6 @@ namespace DiplomaApp.Controllers
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
-        }
-
-        public async Task<IActionResult> GetOffers(int id)
-        {
-
-            if (!CategoryExists(id))
-            {
-                return NotFound();
-            }
-
-            Category category = _context.Category.Find(id);
-            Marketplace marketplace = _context.Marketplace.Find(category.MarketplaceId);
-            string pageUrl;
-            if(String.IsNullOrEmpty(category.LastParsedPageUrl) || category.LastParsedPageUrl == marketplace.UrlBase)
-            {
-                pageUrl = category.Url;
-            }
-            else
-            {
-                pageUrl = category.LastParsedPageUrl;
-            }
-            DateTime startDateTime = DateTime.UtcNow;
-            while(pageUrl.Contains(category.Url) && ((DateTime.UtcNow - startDateTime).TotalSeconds < Constants.parseTimeoutSeconds))
-            {
-                var parseResult = await Crawler.ParseOffersPage(pageUrl, marketplace, Constants.minWaitMilliseconds, Constants.maxWaitMilliseconds);
-                foreach(var parsedOffer in parseResult.Offers)
-                {
-                    if(_context.Offer.Any(c => c.Url == parsedOffer.Url))
-                    {
-                        var existingOffer = _context.Offer.First(c => c.Url == parsedOffer.Url);
-                        if(!_context.OfferPrice.Any(c => c.OfferId == existingOffer.Id && c.CheckDate == parsedOffer.CheckDate))
-                        {
-                            existingOffer.Name = parsedOffer.Name;
-                            existingOffer.Price = parsedOffer.Price;
-                            existingOffer.PricePromotional = parsedOffer.PricePromotional;
-                            existingOffer.CheckDate = parsedOffer.CheckDate;
-                            existingOffer.CategoryId = category.Id;
-                            existingOffer.Category = category;
-                            _context.OfferPrice.Add(new OfferPrice { Price = existingOffer.Price, PricePromotional = existingOffer.PricePromotional, CheckDate = existingOffer.CheckDate, Offer = existingOffer, OfferId = existingOffer.Id});
-                        }
-                    }
-                    else
-                    {
-                        parsedOffer.CategoryId = category.Id;
-                        parsedOffer.Category = category;
-                        _context.Add(parsedOffer);
-                        if (!_context.OfferPrice.Any(c => c.OfferId == parsedOffer.Id && c.CheckDate == parsedOffer.CheckDate))
-                        {
-                            _context.OfferPrice.Add(new OfferPrice { Price = parsedOffer.Price, PricePromotional = parsedOffer.PricePromotional, CheckDate = parsedOffer.CheckDate, Offer = parsedOffer, OfferId = parsedOffer.Id });
-                        }
-                    }
-                }
-                pageUrl = parseResult.NextPageUrl;
-                category.LastParsedPageUrl = pageUrl;
-                _context.SaveChanges();
-            }
-            if(!String.IsNullOrEmpty(category.LastParsedPageUrl))
-            {
-                category.OffersCheckDate = DateTime.UtcNow;
-            }
-            _context.SaveChanges();
-            return RedirectToAction("Details", new { id = id });
         }
 
         private bool CategoryExists(int id)

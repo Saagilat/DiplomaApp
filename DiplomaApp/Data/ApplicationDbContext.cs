@@ -15,23 +15,35 @@ namespace DiplomaApp.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            modelBuilder.Entity<ApplicationRole>()
-            .HasData(
-            new ApplicationRole[] {
-                new ApplicationRole{Id="1",Name=Constants.administrator, NormalizedName=Constants.administrator}
-            });
 
-            modelBuilder.Entity<Marketplace>()
-                .Property(e => e.CategoriesCheckDate).HasColumnType("datetime");
+            modelBuilder.Entity<CatalogPage>()
+                .Property(e => e.CheckDate).HasColumnType("datetime");
+            modelBuilder.Entity<CatalogPage>()
+                .HasKey(c => c.MarketplaceId);
+            modelBuilder.Entity<CatalogPage>()
+                .HasOne(c => c.Marketplace)
+                .WithOne(c => c.CatalogPage);
+
+            modelBuilder.Entity<CategoryPage>()
+                .HasKey(c => c.MarketplaceId);
+            modelBuilder.Entity<CategoryPage>()
+                .HasOne(c => c.Marketplace)
+                .WithOne(c => c.CategoryPage);
+
+            modelBuilder.Entity<OfferPage>()
+                .HasKey(c => c.MarketplaceId);
+            modelBuilder.Entity<OfferPage>()
+                .HasOne(c => c.Marketplace)
+                .WithOne(c => c.OfferPage);
+
 
             modelBuilder.Entity<Category>()
                 .HasOne(p => p.Marketplace)
                 .WithMany(p => p.Categories)
                 .HasForeignKey(p => p.MarketplaceId);
+
             modelBuilder.Entity<Category>()
                 .Property(p => p.CheckDate).HasColumnType("datetime");
-            modelBuilder.Entity<Category>()
-                .Property(p => p.OffersCheckDate).HasColumnType("datetime");
 
             modelBuilder.Entity<Offer>()
                 .HasOne(c => c.Category)
@@ -56,5 +68,8 @@ namespace DiplomaApp.Data
         public DbSet<DiplomaApp.Models.Category>? Category { get; set; }
         public DbSet<DiplomaApp.Models.Offer>? Offer { get; set; }
         public DbSet<DiplomaApp.Models.OfferPrice>? OfferPrice { get; set; }
+        public DbSet<DiplomaApp.Models.CatalogPage>? CatalogPage { get; set; }
+        public DbSet<DiplomaApp.Models.CategoryPage>? CategoryPage { get; set; }
+        public DbSet<DiplomaApp.Models.OfferPage>? OfferPage { get; set; }
     }
 }

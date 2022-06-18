@@ -14,7 +14,6 @@ namespace DiplomaApp.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Discriminator = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true)
@@ -56,25 +55,7 @@ namespace DiplomaApp.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    UrlBase = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    UrlCategories = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    XPathCategories = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    XPathCategoryUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AttributeCategoryUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    XPathCategoryName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AttributeCategoryName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    XPathOffers = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    XPathOfferUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AttributeOfferUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    XPathOfferName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AttributeOfferName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    XPathOfferPrice = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AttributeOfferPrice = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    XPathOfferPricePromotional = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AttributeOfferPricePromotional = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    XPathNextPageUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AttributeNextPageUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CategoriesCheckDate = table.Column<DateTime>(type: "datetime", nullable: false)
+                    Url = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -188,17 +169,39 @@ namespace DiplomaApp.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "CatalogPage",
+                columns: table => new
+                {
+                    MarketplaceId = table.Column<int>(type: "int", nullable: false),
+                    Url = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    XPathCategories = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    XPathUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AttributeUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    XPathName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CheckDate = table.Column<DateTime>(type: "datetime", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CatalogPage", x => x.MarketplaceId);
+                    table.ForeignKey(
+                        name: "FK_CatalogPage_Marketplace_MarketplaceId",
+                        column: x => x.MarketplaceId,
+                        principalTable: "Marketplace",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Category",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    MarketplaceId = table.Column<int>(type: "int", nullable: false),
                     Url = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CheckDate = table.Column<DateTime>(type: "datetime", nullable: false),
-                    OffersCheckDate = table.Column<DateTime>(type: "datetime", nullable: false),
-                    LastParsedPageUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    MarketplaceId = table.Column<int>(type: "int", nullable: false)
+                    LastParsedPageUrl = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -212,17 +215,60 @@ namespace DiplomaApp.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "CategoryPage",
+                columns: table => new
+                {
+                    MarketplaceId = table.Column<int>(type: "int", nullable: false),
+                    Url = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    XPathOffers = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    XPathUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AttributeUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    XPathName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    XPathPrice = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    XPathNextPageUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AttributeNextPageUrl = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CategoryPage", x => x.MarketplaceId);
+                    table.ForeignKey(
+                        name: "FK_CategoryPage_Marketplace_MarketplaceId",
+                        column: x => x.MarketplaceId,
+                        principalTable: "Marketplace",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "OfferPage",
+                columns: table => new
+                {
+                    MarketplaceId = table.Column<int>(type: "int", nullable: false),
+                    XPathName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    XPathPrice = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OfferPage", x => x.MarketplaceId);
+                    table.ForeignKey(
+                        name: "FK_OfferPage_Marketplace_MarketplaceId",
+                        column: x => x.MarketplaceId,
+                        principalTable: "Marketplace",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Offer",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    CategoryId = table.Column<int>(type: "int", nullable: false),
                     Url = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Price = table.Column<float>(type: "real", nullable: false),
-                    PricePromotional = table.Column<float>(type: "real", nullable: false),
-                    CheckDate = table.Column<DateTime>(type: "datetime", nullable: false),
-                    CategoryId = table.Column<int>(type: "int", nullable: false)
+                    CheckDate = table.Column<DateTime>(type: "datetime", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -239,10 +285,9 @@ namespace DiplomaApp.Migrations
                 name: "OfferPrice",
                 columns: table => new
                 {
-                    CheckDate = table.Column<DateTime>(type: "datetime", nullable: false),
                     OfferId = table.Column<int>(type: "int", nullable: false),
-                    Price = table.Column<float>(type: "real", nullable: false),
-                    PricePromotional = table.Column<float>(type: "real", nullable: false)
+                    CheckDate = table.Column<DateTime>(type: "datetime", nullable: false),
+                    Price = table.Column<float>(type: "real", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -254,11 +299,6 @@ namespace DiplomaApp.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
-            migrationBuilder.InsertData(
-                table: "AspNetRoles",
-                columns: new[] { "Id", "ConcurrencyStamp", "Discriminator", "Name", "NormalizedName" },
-                values: new object[] { "1", "0346539b-9b5a-44d2-af41-83d4a2a81d06", "ApplicationRole", "Administrator", "Administrator" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -326,6 +366,15 @@ namespace DiplomaApp.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens");
+
+            migrationBuilder.DropTable(
+                name: "CatalogPage");
+
+            migrationBuilder.DropTable(
+                name: "CategoryPage");
+
+            migrationBuilder.DropTable(
+                name: "OfferPage");
 
             migrationBuilder.DropTable(
                 name: "OfferPrice");

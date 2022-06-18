@@ -1,52 +1,23 @@
 ﻿@model DiplomaApp.ViewModels.OfferDetails
-@if(Model.ChartPrices.Count() >= 1){
-
-    double minPriceChart;
-    double maxPriceChart;
-    if (Model.ChartPrices.Count >= 2)
-    {
-        List<double> prices = new List<double>();
-        foreach(var item in Model.ChartPrices)
-        {
-            prices.Add(item.y);
-        }
-        foreach(var item in Model.ChartPricesPromotional)
-        {
-            prices.Add(item.y);
-        }
-        double minPrice1 = prices.Min();
-        double minPrice2 = prices.FirstOrDefault(c => c > minPrice1);
-        if(minPrice2 < minPrice1)
-        {
-            minPrice2 = minPrice1;
-        }
-        double minPriceDifference = minPrice2 - minPrice1;
-        minPriceChart = minPrice1 - minPriceDifference/4 - 1;
-        maxPriceChart = prices.Max() + minPriceDifference/4 + 1;
-    }
-    else
-    {
-        minPriceChart = Math.Min(Model.ChartPrices.Min(c => c.y), Model.ChartPricesPromotional.Min(c => c.y)) * 0.9;
-        maxPriceChart = Math.Max(Model.ChartPrices.Max(c => c.y), Model.ChartPricesPromotional.Max(c => c.y)) * 1.1;
-    }
+@if(Model.DatasetsJson != null)
+{
 
 <div class="btn-group" role="group" aria-label="Период">
-    <input type="radio" class="btn-check" name="chartPeriod" id="dayButton" autocomplete="off" onclick="updateChart(chart, dayAgo, dayFromNow, 'hour')" checked/>
+    <input type="radio" class="btn-check" name="chartPeriod" id="dayButton" autocomplete="off" onclick="updateChart(chart, dayAgo, 'minute')" checked/>
     <label class="btn btn-outline-primary" for="dayButton">Сутки</label>
 
-    <input type="radio" class="btn-check" name="chartPeriod" id="weekButton" autocomplete="off" onclick="updateChart(chart, weekAgo, weekFromNow, 'day')"/>
+    <input type="radio" class="btn-check" name="chartPeriod" id="weekButton" autocomplete="off" onclick="updateChart(chart, weekAgo, 'day')"/>
     <label class="btn btn-outline-primary" for="weekButton">Неделя</label>
 
-    <input type="radio" class="btn-check" name="chartPeriod" id="monthButton" autocomplete="off" onclick="updateChart(chart, monthAgo, monthFromNow, 'day')"/>
+    <input type="radio" class="btn-check" name="chartPeriod" id="monthButton" autocomplete="off" onclick="updateChart(chart, monthAgo, 'day')"/>
     <label class="btn btn-outline-primary" for="monthButton">Месяц</label>
 
-    <input type="radio" class="btn-check" name="chartPeriod" id="yearButton" autocomplete="off" onclick="updateChart(chart, yearAgo, yearFromNow, 'month')"/>
+    <input type="radio" class="btn-check" name="chartPeriod" id="yearButton" autocomplete="off" onclick="updateChart(chart, yearAgo, 'month')"/>
     <label class="btn btn-outline-primary" for="yearButton">Год</label>
 </div>
 <div class="mt-3 mb-3">
-    <canvas id="offerPricesChart" height="70"></canvas>
+    <canvas id="offerPricesChart" height="100"></canvas>
 </div>
-
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.5.0/dist/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.js"></script>
@@ -54,67 +25,46 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@1.1.1/dist/chartjs-plugin-zoom.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-adapter-moment/1.0.0/chartjs-adapter-moment.js"></script>
 <script>
-    var dayFromNow = @Json.Serialize(DateTime.UtcNow.AddDays(1));
+    var now = @Json.Serialize(DateTime.UtcNow.AddMinutes(1));
     var dayAgo = @Json.Serialize(DateTime.UtcNow.AddDays(-1));
-    var weekFromNow = @Json.Serialize(DateTime.UtcNow.AddDays(7));
     var weekAgo = @Json.Serialize(DateTime.UtcNow.AddDays(-7));
-    var monthFromNow = @Json.Serialize(DateTime.UtcNow.AddMonths(1));
     var monthAgo = @Json.Serialize(DateTime.UtcNow.AddMonths(-1));
-    var yearFromNow = @Json.Serialize(DateTime.UtcNow.AddYears(1));
     var yearAgo = @Json.Serialize(DateTime.UtcNow.AddYears(-1));
-    var prices = @Json.Serialize(Model.ChartPrices);
-    var pricesPromotional = @Json.Serialize(Model.ChartPricesPromotional);
-    var minPrice = @Json.Serialize(minPriceChart);
-    var maxPrice = @Json.Serialize(maxPriceChart);
+    var datasets = JSON.parse('@Html.Raw(Model.DatasetsJson)');
+
     const ctx = document.getElementById('offerPricesChart').getContext('2d');
     var chart = new Chart(ctx, {
          type: 'line',
          data: {
-             datasets: [{
-                 label: 'Обычная цена',
-                 data: prices,
-                 fill: false,
-                 borderColor: 'rgb(55, 110, 219)'
-             },
-             {
-                 label: 'Акционная цена',
-                 data: pricesPromotional,
-                 fill: true,
-                 borderColor: 'rgb(219, 0, 11)'
-             }]
+             datasets: datasets
          },
          options: {
              scales: {
                  x: {
                     min: dayAgo,
-                    max: dayFromNow,
+                    max: now,
                     type: 'time',
                     time: {
-                      unit: 'hour',
+                      unit: 'minute',
                       tooltipFormat: 'DD.MM.YYYY HH:mm:ss'
                     }
                   },
                  y: {
-                     min: minPrice,
-                     max: maxPrice,
+                     min: (@ViewData["MinPrice"] - (@ViewData["MaxPrice"] - @ViewData["MinPrice"]) * 0.1 - 1),
+                     max: (@ViewData["MaxPrice"] + (@ViewData["MaxPrice"] - @ViewData["MinPrice"]) * 0.1 + 1),
                  }
              }
          }          
      });
     onload = function()
     {
-    chart.render();
+        chart.render();
     }
-    function updateChart(chart, minDate, maxDate, unit)
+    function updateChart(chart, minDate, unit)
     {
         chart.options.scales.x.min = minDate;
-        chart.options.scales.x.max = maxDate;
         chart.options.scales.x.time.unit = unit;
         chart.update();
     }
 </script>
-}
-else
-{
-    
 }

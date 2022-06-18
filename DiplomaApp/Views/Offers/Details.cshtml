@@ -1,19 +1,89 @@
 ﻿@model DiplomaApp.ViewModels.OfferDetails
 
 @{
-    ViewData["Title"] = Model.Offer.Name;
+    ViewData["Title"] = Model.OfferName;
 }
 
 <div>
     @{ Html.RenderPartial("~/Views/Offers/PartialRender/DetailsForm.cshtml", Model); }
 </div>
 <div>
-    @{ Html.RenderPartial("~/Views/Offers/PartialRender/PriceChart.cshtml", Model); }
+    @{
+        Html.RenderPartial("~/Views/Offers/PartialRender/PriceChart.cshtml", Model);
+    }
 </div>
 <div>
-    <h2>Похожие предложения</h2>
-    @{ Html.RenderPartial("~/Views/Offers/PartialRender/IndexTable.cshtml", Model.SimilliarOffers); }
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>
+                    Товар
+                </th>
+                <th>
+                    Категория
+                </th>
+                <th>
+                    Маркетплейс
+                </th>
+                <th>
+                    Цена
+                </th>
+                <th>
+                    Дата проверки
+                </th>
+                <th>
+                    URL
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+        @if (Model != null)
+            {
+                foreach (var item in Model.SimilliarOffers)
+                {
+                    <tr>
+                        <td>
+                            <a asp-controller="Offers" asp-action="Details" asp-route-id="@item.Offer.Id">@Html.DisplayFor(modelItem => item.Offer.Name)</a>
+                        </td>
+                        <td>
+                            <a asp-controller="Offers" asp-action="Index" asp-route-category="@item.CategoryName">@item.CategoryName</a>
+                        </td>
+                        <td>
+                            <a asp-controller="Offers" asp-action="Index" asp-route-marketplace="@item.MarketplaceName">@item.MarketplaceName</a>
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Offer.Price)
+                        </td>
+                        <td>
+                            <div class="date">@item.Offer.CheckDate.ToString("yyyy-MM-dd HH:mm:ss")</div>
+                        </td>
+                        <td>
+                            <a href=@item.Offer.Url>@Html.DisplayFor(modelItem => item.Offer.Url)</a>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
 </div>
 <div>
     <a asp-action="Index">Назад к списку</a>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.js"></script>
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script>
+        $(document).ready(function () {
+            $('.date').each(function () {
+                try {
+                    var text = $(this).html();
+                    var offset = moment().utcOffset();
+                    var serverDate = moment.utc(text).utcOffset(offset).format("DD.MM.YYYY HH:mm:ss"); 
+
+                    $(this).html(serverDate);
+                }
+                catch (ex) {
+                    console.warn("Error converting date time", ex);
+                }
+            });
+        });
+</script>

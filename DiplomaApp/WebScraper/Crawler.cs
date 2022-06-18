@@ -7,66 +7,93 @@ namespace DiplomaApp.WebScraper
 {
     public class Crawler
     {
-        public static async Task<List<Category>> GetCategories(Marketplace marketplace)
+        public class CatalogPageScrapeResult
         {
-            List<Category> result = new List<Category>();
+            public bool ResponseSuccesful;
+            public List<Category> Categories;
+            public CatalogPageScrapeResult()
+            {
+                ResponseSuccesful = false;
+                Categories = new List<Category>();
+            }
+        }
+        public static async Task<Offer> ScrapeOfferPage(string url, OfferPage offerPage)
+        {
+            Offer result = new Offer();
             using var client = new HttpClient();
-            var response = await client.GetAsync(marketplace.UrlCategories);
-            Console.WriteLine(marketplace.UrlCategories);
-            Console.WriteLine(response.StatusCode);
+            var response = await client.GetAsync(url);
+            Console.WriteLine(url + ">---->" + response.StatusCode);
             if (response.IsSuccessStatusCode)
             {
                 var checkDate = DateTime.UtcNow;
                 var responseContent = await response.Content.ReadAsStringAsync();
                 var htmlDocument = new HtmlDocument();
                 htmlDocument.LoadHtml(responseContent);
-                var parsedCategories = ParseCategories(htmlDocument, marketplace);
-                foreach(var category in parsedCategories)
-                {
-                    category.CheckDate = checkDate;
-                    Console.WriteLine(category.Url);
-                }
-                result.AddRange(parsedCategories);
+                result = ParseOfferFromOfferPage(htmlDocument, offerPage);
+                result.CheckDate = checkDate;
             }
             return result;
         }
-
-        public class PageParseResult
-        { 
+        public static async Task<CatalogPageScrapeResult> ScrapeCatalogPage(CatalogPage catalogPage)
+        {
+            CatalogPageScrapeResult result = new CatalogPageScrapeResult();
+            using var client = new HttpClient();
+            var response = await client.GetAsync(catalogPage.Url);
+            Console.WriteLine(catalogPage.Url + ">---->" + response.StatusCode);
+            if (response.IsSuccessStatusCode)
+            {
+                result.ResponseSuccesful = true;
+                var checkDate = DateTime.UtcNow;
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var htmlDocument = new HtmlDocument();
+                htmlDocument.LoadHtml(responseContent);
+                var parsedCategories = ParseCatalogPage(htmlDocument, catalogPage);
+                foreach(var category in parsedCategories)
+                {
+                    category.CheckDate = checkDate;
+                    Console.WriteLine("    " + category.Url);
+                }
+                result.Categories.AddRange(parsedCategories);
+            }
+            return result;
+        }
+        
+        public class CategoryPageScrapeResult
+        {
+            public bool ResponseSuccesful;
             public List<Offer> Offers;
             public string NextPageUrl;
-            public PageParseResult()
+            public CategoryPageScrapeResult()
             {
+               ResponseSuccesful = false;
                NextPageUrl = "";
                Offers = new List<Offer>();
             }
         }
-        public static async Task<PageParseResult> ParseOffersPage(string pageUrl, Marketplace marketplace, int minWaitMilliseconds = Constants.minWaitMilliseconds, int maxWaitMilliseconds = Constants.maxWaitMilliseconds)
+        public static async Task<CategoryPageScrapeResult> ScrapeCategoryPage(string url, CategoryPage categoryPage, int minWait = Constants.minWaitMilliseconds, int maxWait = Constants.maxWaitMilliseconds)
         {
 
-            PageParseResult result = new PageParseResult();
+            CategoryPageScrapeResult result = new CategoryPageScrapeResult();
             Random random = new Random();
             using var client = new HttpClient();
-            var response = await client.GetAsync(pageUrl);
-
-            Console.WriteLine(pageUrl + " >-> " + response.StatusCode);
+            var response = await client.GetAsync(url);
+            Console.WriteLine(url + " >-> " + response.StatusCode);
             if (response.IsSuccessStatusCode)
             {
+                result.ResponseSuccesful = true;
                 var checkDate = DateTime.UtcNow;
                 var responseContent = await response.Content.ReadAsStringAsync();
                 HtmlDocument htmlDocument = new HtmlDocument();
                 htmlDocument.LoadHtml(responseContent);
-                var parsedOffers = ParseOffers(htmlDocument, marketplace);
+                var parsedOffers = ParseCategoryPage(htmlDocument, categoryPage);
                 foreach (var offer in parsedOffers)
                 {
                     offer.CheckDate = checkDate;
                 }
                 result.Offers.AddRange(parsedOffers);
-                result.NextPageUrl = ParseNextUrl(htmlDocument, marketplace);
-            }            
-
-            Thread.Sleep(random.Next(minWaitMilliseconds, maxWaitMilliseconds));
-            
+                result.NextPageUrl = ParseCategoryPageNextUrl(htmlDocument, categoryPage);
+            }
+            Thread.Sleep(random.Next(minWait, maxWait));
             return result;
         }
     }

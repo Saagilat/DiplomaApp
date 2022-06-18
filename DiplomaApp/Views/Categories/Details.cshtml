@@ -3,14 +3,9 @@
 @{
     ViewData["Title"] = @Model.Category.Name;
 }
-
-<h1>@ViewData["Title"]</h1>
-
 <div>
-    <h4>Category</h4>
-    <hr />
-    @{ Html.RenderPartial("~/Views/Categories/PartialRender/DetailsForm.cshtml", Model.Category); }
-    <a asp-controller="Categories" asp-action="GetOffers" asp-route-id="@Model.Category.Id">Обновить предложения</a>
+    @{ Html.RenderPartial("~/Views/Categories/PartialRender/DetailsForm.cshtml", Model); }
+    <a asp-controller="Marketplaces" asp-action="GetCategoryOffers" asp-route-id="@Model.Category.Id">Обновить предложения</a>
 </div>
 <div>
     @{ Html.RenderPartial("~/Views/Offers/PartialRender/IndexTable.cshtml", Model.Offers); }

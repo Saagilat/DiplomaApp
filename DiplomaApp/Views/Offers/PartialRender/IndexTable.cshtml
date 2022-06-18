@@ -91,7 +91,7 @@
                             @Html.DisplayFor(modelItem => item.Offer.Price)
                         </td>
                         <td>
-                            @Html.DisplayFor(modelItem => item.Offer.CheckDate)
+                            <div class="date">@item.Offer.CheckDate.ToString("yyyy-MM-dd HH:mm:ss")</div>
                         </td>
                         <td>
                             <a href=@item.Offer.Url>@Html.DisplayFor(modelItem => item.Offer.Url)</a>
@@ -118,8 +118,21 @@
         })
     </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.js"></script>
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
 <script>
-    function updateValue(id, value) {
-          document.getElementById(id).value=value; 
-        }
+        $(document).ready(function () {
+            $('.date').each(function () {
+                try {
+                    var text = $(this).html();
+                    var offset = moment().utcOffset();
+                    var serverDate = moment.utc(text).utcOffset(offset).format("DD.MM.YYYY HH:mm:ss"); 
+
+                    $(this).html(serverDate);
+                }
+                catch (ex) {
+                    console.warn("Error converting date time", ex);
+                }
+            });
+        });
 </script>

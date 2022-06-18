@@ -14,6 +14,7 @@ using System.Web;
 using X.PagedList;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Authorization;
+using DiplomaApp.WebScraper;
 
 namespace DiplomaApp.Controllers
 {
@@ -90,6 +91,7 @@ namespace DiplomaApp.Controllers
                 offerIndexes.Add(new OfferIndex { Offer = offer, CategoryName = _context.Category.Find(offer.CategoryId).Name, MarketplaceName = _context.Marketplace.Find(_context.Category.Find(offer.CategoryId).MarketplaceId).Name });
             }
             IPagedList<OfferIndex> viewModel = offerIndexes.ToPagedList(page, Constants.recordsPerPage);
+
             return View(viewModel);            
         }
 
@@ -107,13 +109,23 @@ namespace DiplomaApp.Controllers
             {
                 return NotFound();
             }
-            var offers = Enumerable.AsEnumerable(_context.Offer).Where(c => c.Name.ToLower().Contains(offer.Name.ToLower()));
-            if (offers.Any())
+            var offerCategory = _context.Category.Find(offer.CategoryId);
+            var offerMarketplace = _context.Marketplace.Find(offerCategory.MarketplaceId);
+            var offerPage = _context.OfferPage.Find(offerMarketplace.Id);
+            if ((DateTime.UtcNow - offer.CheckDate).TotalMinutes > Constants.offerExpirationTimeMinutes)
             {
-                ViewData["MinPrice"] = offers.Min(c => c.Price);
-                ViewData["MaxPrice"] = offers.Max(c => c.Price);
+                var parsedOffer = await Crawler.ScrapeOfferPage(offer.Url, offerPage);
+                
+                if (!_context.OfferPrice.Any(c => c.OfferId == offer.Id && c.CheckDate == parsedOffer.CheckDate))
+                {
+                    offer.Price = parsedOffer.Price;
+                    offer.Name = parsedOffer.Name;
+                    offer.CheckDate = parsedOffer.CheckDate;
+                    _context.OfferPrice.Add(new OfferPrice { Price = offer.Price, CheckDate = offer.CheckDate, Offer = offer, OfferId = offer.Id });
+                }
+                _context.SaveChanges();
             }
-            OfferDetails viewModel = new OfferDetails();
+            var offers = Enumerable.AsEnumerable(_context.Offer).Where(c => c.Name.ToLower().Contains(offer.Name.ToLower()));
             ViewData["Name"] = offer.Name;
             if (maxPrice != 0)
             {
@@ -155,31 +167,55 @@ namespace DiplomaApp.Controllers
                     offers = offers.OrderBy(c => c.CheckDate);
                     break;
             }
-
-            var offerIndexes = new List<OfferIndex>();
-            foreach(var item in offers)
+            if (offers.Any())
             {
-                offerIndexes.Add(new OfferIndex { Offer = item, CategoryName = _context.Category.Find(item.CategoryId).Name, MarketplaceName = _context.Marketplace.Find(_context.Category.Find(item.CategoryId).MarketplaceId).Name });
-            }
-            List<ChartDataPoint> chartPrices = new List<ChartDataPoint>();
-            List<ChartDataPoint> chartPricesPromotional = new List<ChartDataPoint>();
-
-            var offerPrices = _context.OfferPrice.Where(c => c.OfferId == id);
-            foreach (var item in offerPrices)
-            {
-                chartPrices.Add(new ChartDataPoint (item.CheckDate, item.Price));
-                chartPricesPromotional.Add(new ChartDataPoint (item.CheckDate, item.PricePromotional));
+                var offerPrices = new List<float>();
+                foreach (var item in offers)
+                {
+                    offerPrices.AddRange(_context.OfferPrice.Where(c => c.OfferId == item.Id).Select(c => c.Price));
+                }
+                ViewData["MinPrice"] = offerPrices.Min();
+                ViewData["MaxPrice"] = offerPrices.Max();
             }
 
-            var offerCategory = _context.Category.Find(offer.CategoryId);
-            viewModel.Offer = offer;
+            OfferDetails viewModel = new OfferDetails();
+            viewModel.MarketplaceName = offerMarketplace.Name;
+            viewModel.MarketplaceUrl = offerMarketplace.Url;
             viewModel.CategoryName = offerCategory.Name;
             viewModel.CategoryUrl = offerCategory.Url;
-            viewModel.MarketplaceName = _context.Marketplace.Find(offerCategory.MarketplaceId).Name;
-            viewModel.MarketplaceUrl = _context.Marketplace.Find(offerCategory.MarketplaceId).UrlBase;
-            viewModel.SimilliarOffers = offerIndexes.ToPagedList(page, Constants.recordsPerPage);
-            viewModel.ChartPrices = chartPrices;
-            viewModel.ChartPricesPromotional = chartPricesPromotional;
+            viewModel.OfferName = offer.Name;
+            viewModel.OfferUrl = offer.Url;
+            List<Dataset> Datasets = new List<Dataset>();
+            Random random = new Random();
+            int iterator = 0;
+            foreach(var item in offers)
+            {
+                var itemCategory = _context.Category.Find(item.CategoryId);
+                var itemMarketplace = _context.Marketplace.Find(itemCategory.MarketplaceId);
+                viewModel.SimilliarOffers.Add(new OfferIndex
+                {
+                    CategoryName = itemCategory.Name,
+                    MarketplaceName = itemMarketplace.Name,
+                    Offer = item
+                });
+                List<OfferPrice> offerPrices = _context.OfferPrice.Where(c => c.OfferId == item.Id).ToList();
+                Dataset chartOfferDataset1 = new Dataset();
+                int r = (iterator + 1) * (150 / offers.Count());
+                int g = 150;
+                int b = (iterator + 1) * (255 / offers.Count());
+                chartOfferDataset1.label = itemMarketplace.Name + " - " + item.Name;
+                chartOfferDataset1.borderColor = "rgb(" + r + ", " + g + ", " + b + ")";
+                List<DataPoint> points1 = new List<DataPoint>();
+                foreach(var offerPrice in offerPrices)
+                {
+                    points1.Add(new DataPoint() {x = offerPrice.CheckDate.ToLocalTime(), y = offerPrice.Price });
+                }
+                chartOfferDataset1.data = points1;
+                Datasets.Add(chartOfferDataset1);
+                viewModel.DatasetsJson = JsonConvert.SerializeObject(Datasets);
+                viewModel.Datasets = Datasets;
+                iterator++;
+            }
             return View(viewModel);
         }
 

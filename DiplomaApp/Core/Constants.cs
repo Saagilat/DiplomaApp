@@ -8,6 +8,7 @@
         public const int maxWaitMilliseconds = 4000;
         public const double categoryGetOffersExpirationTimeHours = 24;
         public const double marketplaceGetCategoriesExpirationTimeHours = 24;
+        public const double offerExpirationTimeMinutes = 10;
         public const double parseTimeoutSeconds = 3600;
         public const string nameAsc = "name-asc";
         public const string nameDesc = "name-desc";
@@ -16,5 +17,6 @@
         public const string checkDateAsc = "checkdate-asc";
         public const string checkDateDesc = "checkdate-desc";
         public const string administrator = "Administrator";
+        public const string promotionalPrice = "Акционная цена";
     }
 }

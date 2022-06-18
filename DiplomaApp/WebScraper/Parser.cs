@@ -8,199 +8,168 @@ namespace DiplomaApp.WebScraper
 {
     public class Parser
     {
-        public static Category ParseCategory(HtmlNode htmlNode, Marketplace marketplace)
-        {
-            var result = new Category();
-            string url;
-            string name;
-            if (String.IsNullOrEmpty(marketplace.AttributeCategoryUrl))
-            {
-                url = htmlNode.SelectSingleNode(marketplace.XPathCategoryUrl).InnerText;
-            }
-            else
-            {
-                url = htmlNode.SelectSingleNode(marketplace.XPathCategoryUrl).GetAttributeValue(marketplace.AttributeCategoryUrl, "");
-            }
-            if (String.IsNullOrEmpty(marketplace.AttributeCategoryName))
-            {
-                name = htmlNode.SelectSingleNode(marketplace.XPathCategoryName).InnerText;
-            }
-            else
-            {
-                name = htmlNode.SelectSingleNode(marketplace.XPathCategoryName).GetAttributeValue(marketplace.AttributeCategoryName, "");
-            }
-            url = HttpUtility.HtmlDecode(url); 
-            url = NormalizeUrl(url, marketplace);
-            name = HttpUtility.HtmlDecode(name);
-            name = name.Trim();
-            result.Url = url;
-            result.Name = name;
-            return result;
-        }
-        public static List<Category> ParseCategories(HtmlDocument htmlDocument, Marketplace marketplace)
+        public static List<Category> ParseCatalogPage(HtmlDocument htmlDocument, CatalogPage catalogPage)
         {
             List<Category> result = new List<Category>();
-            var categories = htmlDocument.DocumentNode.SelectNodes(marketplace.XPathCategories);
-            if (categories != null)
+            var categoryNodes = htmlDocument.DocumentNode.SelectNodes(catalogPage.XPathCategories);
+            if (categoryNodes != null)
             {
-                foreach (var category in categories)
+                foreach (var categoryNode in categoryNodes)
                 {
-                    var parsedCategory = ParseCategory(category, marketplace);
-                    if (parsedCategory.Url != "")
+                    var parsedCategory = new Category();
+                    string url;
+                    string name;
+                    url = categoryNode.SelectSingleNode(catalogPage.XPathUrl).GetAttributeValue(catalogPage.AttributeUrl, "");
+                    name = categoryNode.SelectSingleNode(catalogPage.XPathName).InnerText;
+                    url = HttpUtility.HtmlDecode(url);
+                    url = NormalizeUrl(url, catalogPage.UrlMarketplace);
+                    name = name.Trim();
+                    parsedCategory.Url = url;
+                    parsedCategory.Name = name;
+                    if (!String.IsNullOrEmpty(parsedCategory.Url))
                     {
                         result.Add(parsedCategory);
                     }
                 }
             }
-            return result;
-        }
-        public static Offer ParseOffer(HtmlNode htmlNode, Marketplace marketplace)
-        {
-            Offer result = new Offer();
-            string url;
-            string name;
-            string priceString;
-            string pricePromotionalString;
-            float price;
-            float pricePromotional;
-
-            if (htmlNode != null)
+            else
             {
-                var urlNode = htmlNode.SelectSingleNode(marketplace.XPathOfferUrl);
-                var nameNode = htmlNode.SelectSingleNode(marketplace.XPathOfferName);
-                var priceNode = htmlNode.SelectSingleNode(marketplace.XPathOfferPrice);
-                var pricePromotionalNode = htmlNode.SelectSingleNode(marketplace.XPathOfferPricePromotional);
-                if (urlNode == null)
-                {
-                    Console.WriteLine("URL NODE == NULL - XPathUrl probably incorrect");
-                }
-                if (nameNode == null)
-                {
-                    Console.WriteLine("NAME NODE == NULL - XPathName probably incorrect");
-                }
-                if(priceNode == null)
-                {
-                    Console.WriteLine("PRICE NODE == NULL - XPathPrice probably incorrect");
-                }
-                if (pricePromotionalNode == null)
-                {
-                    Console.WriteLine("PRICEPROMOTIONAL NODE == NULL - XPathPricePromotional probably incorrect");
-                }
-                if (urlNode != null && nameNode != null && priceNode != null && pricePromotionalNode != null)
-                {
-                    if (String.IsNullOrEmpty(marketplace.AttributeOfferUrl))
-                    {
-                        url = urlNode.InnerText;
-                    }
-                    else
-                    {
-                        url = urlNode.GetAttributeValue(marketplace.AttributeOfferUrl, "");
-                    }
-                    if (String.IsNullOrEmpty(marketplace.AttributeOfferName))
-                    {
-                        name = nameNode.InnerText;
-                    }
-                    else
-                    {
-                        name = nameNode.GetAttributeValue(marketplace.AttributeOfferName, "");
-                    }
-                    if (String.IsNullOrEmpty(marketplace.AttributeOfferPrice))
-                    {
-                        priceString = priceNode.InnerText;
-                        priceString = Regex.Replace(priceString, "[^\\d.]", "");
-                    }
-                    else
-                    {
-                        priceString = priceNode.GetAttributeValue(marketplace.AttributeOfferPrice, "");
-                        priceString = Regex.Replace(priceString, "[^\\d.]", ""); 
-                    }
-                    if (String.IsNullOrEmpty(marketplace.AttributeOfferPricePromotional))
-                    {
-                        pricePromotionalString = pricePromotionalNode.InnerText;
-                        pricePromotionalString = Regex.Replace(pricePromotionalString, "[^\\d.]", "");
-                    }
-                    else
-                    {
-                        pricePromotionalString = pricePromotionalNode.GetAttributeValue(marketplace.AttributeOfferPricePromotional, "");
-                        pricePromotionalString = Regex.Replace(pricePromotionalString, "[^\\d.]", "");
-                    }
-                    url = HttpUtility.HtmlDecode(url);
-                    url = NormalizeUrl(url, marketplace);
-                    name = HttpUtility.HtmlDecode(name);
-                    name = name.Trim();
-                    price = float.Parse(priceString, CultureInfo.InvariantCulture);
-                    if (!String.IsNullOrEmpty(pricePromotionalString))
-                    {
-                        pricePromotional = float.Parse(pricePromotionalString, CultureInfo.InvariantCulture);
-                    }
-                    else
-                    {
-                        pricePromotional = price;
-                    }
-                    result.Url = url;
-                    result.Name = name;
-                    result.Price = price;
-                    result.PricePromotional = pricePromotional;
-                    Console.WriteLine(name + ": " + price + "|" + pricePromotional + " " + url);
-                }
+                Console.WriteLine("CATEGORY NODES == NULL XPathCategories probably incorrect");
+                Console.WriteLine(catalogPage.XPathCategories);
             }
             return result;
         }
-        public static List<Offer> ParseOffers(HtmlDocument htmlDocument, Marketplace marketplace)
+
+        public static List<Offer> ParseCategoryPage(HtmlDocument htmlDocument, CategoryPage categoryPage)
         {
             List<Offer> result = new List<Offer>();
-            var offers = htmlDocument.DocumentNode.SelectNodes(marketplace.XPathOffers);
-            if (offers != null)
+            var offerNodes = htmlDocument.DocumentNode.SelectNodes(categoryPage.XPathOffers);
+            if (offerNodes != null)
             {
-                foreach (var offer in offers)
+                foreach (var offerNode in offerNodes)
                 {
-                    var parsedOffer = ParseOffer(offer, marketplace);
-                    if (((parsedOffer != null && !String.IsNullOrEmpty(parsedOffer.Url)) && !String.IsNullOrEmpty(parsedOffer.Name)) && parsedOffer.Price != null)
+                    Offer parsedOffer = new Offer();
+                    
+                    if (offerNode != null)
                     {
-                        result.Add(parsedOffer);
+                        string url;
+                        string name;
+                        string priceString;
+                        float price;
+                        var urlNode = offerNode.SelectSingleNode(categoryPage.XPathUrl);
+                        var nameNode = offerNode.SelectSingleNode(categoryPage.XPathName);
+                        var priceNode = offerNode.SelectSingleNode(categoryPage.XPathPrice);
+                        if (urlNode == null)
+                        {
+                            Console.WriteLine("URL NODE == NULL - XPathUrl probably incorrect");
+                            Console.WriteLine(categoryPage.XPathUrl);
+                        }
+                        if (nameNode == null)
+                        {
+                            Console.WriteLine("NAME NODE == NULL - XPathName probably incorrect");
+                            Console.WriteLine(categoryPage.XPathName);
+                        }
+                        if (priceNode == null)
+                        {
+                            Console.WriteLine("PRICE NODE == NULL - XPathPrice probably incorrect");
+                            Console.WriteLine(categoryPage.XPathPrice);
+                        }
+                        if (urlNode != null && nameNode != null && priceNode != null)
+                        {
+                            url = urlNode.GetAttributeValue(categoryPage.AttributeUrl, "");
+                            name = nameNode.InnerText;
+                            priceString = priceNode.InnerText;
+                            priceString = HttpUtility.HtmlDecode(priceString);
+                            priceString = Regex.Replace(priceString, "[^\\d.]", "");
+                            url = HttpUtility.HtmlDecode(url);
+                            url = NormalizeUrl(url, categoryPage.UrlMarketplace);
+                            name = HttpUtility.HtmlDecode(name);
+                            name = name.Trim();
+                            price = float.Parse(priceString, CultureInfo.InvariantCulture);
+                            parsedOffer.Url = url;
+                            parsedOffer.Name = name;
+                            parsedOffer.Price = price;
+                            Console.WriteLine(name + ": " + price + " " + url);
+                            if (((parsedOffer != null && !String.IsNullOrEmpty(parsedOffer.Url)) && !String.IsNullOrEmpty(parsedOffer.Name)) && parsedOffer.Price != null)
+                            {
+                                result.Add(parsedOffer);
+                            }
+                        }
                     }
                 }
             }
             else
             {
-                Console.WriteLine("OFFERS == NULL - XPathCategory probably incorrect");
+                Console.WriteLine("OFFERS NODE == NULL - XPathCategory probably incorrect");
+                Console.WriteLine(categoryPage.XPathOffers);
             }
             return result;
         }
-        public static string ParseNextUrl(HtmlDocument htmlDocument, Marketplace marketplace)
+        public static string ParseCategoryPageNextUrl(HtmlDocument htmlDocument, CategoryPage categoryPage)
         {
             string result = "";
-            HtmlNode htmlNode = htmlDocument.DocumentNode.SelectSingleNode(marketplace.XPathNextPageUrl);
+            HtmlNode htmlNode = htmlDocument.DocumentNode.SelectSingleNode(categoryPage.XPathNextPageUrl);
             if (htmlNode != null)
             {
-                if (String.IsNullOrEmpty(marketplace.AttributeNextPageUrl))
-                {
-                    result = htmlNode.InnerText;
-                }
-                else
-                {
-                    result = htmlNode.GetAttributeValue(marketplace.AttributeNextPageUrl, "");
-                }
+                result = htmlNode.GetAttributeValue(categoryPage.AttributeNextPageUrl, "");
+            }
+            else
+            {
+                Console.WriteLine("NEXT PAGE URL NODE == NULL - end of category, or categoryXPathNextPageUrl incorrect");
+                Console.WriteLine(categoryPage.XPathNextPageUrl);
             }
             result = HttpUtility.HtmlDecode(result);
-            result = NormalizeUrl(result, marketplace);
+            result = NormalizeUrl(result, categoryPage.UrlMarketplace);
             return result;
         }
-        public static string NormalizeUrl(string url, Marketplace marketplace)
+
+        public static Offer ParseOfferFromOfferPage(HtmlDocument htmlDocument, OfferPage offerPage)
+        {
+            Offer result = new Offer();
+            var nameNode = htmlDocument.DocumentNode.SelectSingleNode(offerPage.XPathName);
+            var priceNode = htmlDocument.DocumentNode.SelectSingleNode(offerPage.XPathPrice);
+            string name;
+            string priceString;
+            float price;
+            if (nameNode == null)
+            {
+                Console.WriteLine("OFFER PAGE NAME NODE == NULL - XPathName probably incorrect");
+                Console.WriteLine(offerPage.XPathName);
+            }
+            if (priceNode == null)
+            {
+                Console.WriteLine("OFFER PAGE PRICE NODE == NULL - XPathPrice probably incorrect");
+                Console.WriteLine(offerPage.XPathPrice);
+            }
+            if (nameNode != null && priceNode != null)
+            {
+                name = nameNode.InnerText;
+                name = HttpUtility.HtmlDecode(name);
+                name = name.Trim();
+                priceString = priceNode.InnerText;
+                priceString = HttpUtility.HtmlDecode(priceString);
+                priceString = Regex.Replace(priceString, "[^\\d.]", "");
+                price = float.Parse(priceString, CultureInfo.InvariantCulture);
+                result.Price = price;
+                result.Name = name;
+            }
+            return result;
+        }
+
+        public static string NormalizeUrl(string url, string rootUrl)
         {
             string result = url.Trim();
-            if(!result.Contains(marketplace.UrlBase))
+            if(!result.Contains(rootUrl))
             {
                 if (!(result.Contains("http") || (result.Contains("#"))))
                 {
-                    result = marketplace.UrlBase + url;
+                    result = rootUrl + url;
                 }
                 else
                 {
                     result = "";
                 }
             }
-
             return result;
         }
     }

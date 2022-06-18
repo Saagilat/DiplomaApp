@@ -7,5 +7,10 @@ namespace DiplomaApp.ViewModels
         public Offer Offer { get; set; }
         public string CategoryName { get; set; }
         public string MarketplaceName { get; set; }
+        public OfferIndex()
+
+        {
+
+        }
     }
 }

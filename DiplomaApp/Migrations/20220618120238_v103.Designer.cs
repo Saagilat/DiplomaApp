@@ -12,17 +12,54 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DiplomaApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20220615151224_v100")]
-    partial class v100
+    [Migration("20220618120238_v103")]
+    partial class v103
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.5")
+                .HasAnnotation("ProductVersion", "6.0.6")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
+
+            modelBuilder.Entity("DiplomaApp.Models.CatalogPage", b =>
+                {
+                    b.Property<int>("MarketplaceId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("AttributeUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CheckDate")
+                        .HasColumnType("datetime");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UrlMarketplace")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("XPathCategories")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("XPathName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("XPathUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("MarketplaceId");
+
+                    b.ToTable("CatalogPage");
+                });
 
             modelBuilder.Entity("DiplomaApp.Models.Category", b =>
                 {
@@ -45,9 +82,6 @@ namespace DiplomaApp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("OffersCheckDate")
-                        .HasColumnType("datetime");
-
                     b.Property<string>("Url")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -59,6 +93,48 @@ namespace DiplomaApp.Migrations
                     b.ToTable("Category");
                 });
 
+            modelBuilder.Entity("DiplomaApp.Models.CategoryPage", b =>
+                {
+                    b.Property<int>("MarketplaceId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("AttributeNextPageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AttributeUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UrlMarketplace")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("XPathName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("XPathNextPageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("XPathOffers")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("XPathPrice")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("XPathUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("MarketplaceId");
+
+                    b.ToTable("CategoryPage");
+                });
+
             modelBuilder.Entity("DiplomaApp.Models.Marketplace", b =>
                 {
                     b.Property<int>("Id")
@@ -67,75 +143,11 @@ namespace DiplomaApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<string>("AttributeCategoryName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("AttributeCategoryUrl")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("AttributeNextPageUrl")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("AttributeOfferName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("AttributeOfferPrice")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("AttributeOfferPricePromotional")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("AttributeOfferUrl")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CategoriesCheckDate")
-                        .HasColumnType("datetime");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UrlBase")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UrlCategories")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("XPathCategories")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("XPathCategoryName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("XPathCategoryUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("XPathNextPageUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("XPathOfferName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("XPathOfferPrice")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("XPathOfferPricePromotional")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("XPathOfferUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("XPathOffers")
+                    b.Property<string>("Url")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -165,9 +177,6 @@ namespace DiplomaApp.Migrations
                     b.Property<float>("Price")
                         .HasColumnType("real");
 
-                    b.Property<float>("PricePromotional")
-                        .HasColumnType("real");
-
                     b.Property<string>("Url")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -179,6 +188,28 @@ namespace DiplomaApp.Migrations
                     b.ToTable("Offer");
                 });
 
+            modelBuilder.Entity("DiplomaApp.Models.OfferPage", b =>
+                {
+                    b.Property<int>("MarketplaceId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UrlMarketplace")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("XPathName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("XPathPrice")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("MarketplaceId");
+
+                    b.ToTable("OfferPage");
+                });
+
             modelBuilder.Entity("DiplomaApp.Models.OfferPrice", b =>
                 {
                     b.Property<int>("OfferId")
@@ -188,9 +219,6 @@ namespace DiplomaApp.Migrations
                         .HasColumnType("datetime");
 
                     b.Property<float>("Price")
-                        .HasColumnType("real");
-
-                    b.Property<float>("PricePromotional")
                         .HasColumnType("real");
 
                     b.HasKey("OfferId", "CheckDate");
@@ -205,10 +233,6 @@ namespace DiplomaApp.Migrations
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
@@ -227,8 +251,6 @@ namespace DiplomaApp.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
-
-                    b.HasDiscriminator<string>("Discriminator").HasValue("IdentityRole");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -406,20 +428,15 @@ namespace DiplomaApp.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("DiplomaApp.Models.ApplicationRole", b =>
+            modelBuilder.Entity("DiplomaApp.Models.CatalogPage", b =>
                 {
-                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityRole");
+                    b.HasOne("DiplomaApp.Models.Marketplace", "Marketplace")
+                        .WithOne("CatalogPage")
+                        .HasForeignKey("DiplomaApp.Models.CatalogPage", "MarketplaceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.HasDiscriminator().HasValue("ApplicationRole");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "1",
-                            ConcurrencyStamp = "0346539b-9b5a-44d2-af41-83d4a2a81d06",
-                            Name = "Administrator",
-                            NormalizedName = "Administrator"
-                        });
+                    b.Navigation("Marketplace");
                 });
 
             modelBuilder.Entity("DiplomaApp.Models.Category", b =>
@@ -427,6 +444,17 @@ namespace DiplomaApp.Migrations
                     b.HasOne("DiplomaApp.Models.Marketplace", "Marketplace")
                         .WithMany("Categories")
                         .HasForeignKey("MarketplaceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Marketplace");
+                });
+
+            modelBuilder.Entity("DiplomaApp.Models.CategoryPage", b =>
+                {
+                    b.HasOne("DiplomaApp.Models.Marketplace", "Marketplace")
+                        .WithOne("CategoryPage")
+                        .HasForeignKey("DiplomaApp.Models.CategoryPage", "MarketplaceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -442,6 +470,17 @@ namespace DiplomaApp.Migrations
                         .IsRequired();
 
                     b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("DiplomaApp.Models.OfferPage", b =>
+                {
+                    b.HasOne("DiplomaApp.Models.Marketplace", "Marketplace")
+                        .WithOne("OfferPage")
+                        .HasForeignKey("DiplomaApp.Models.OfferPage", "MarketplaceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Marketplace");
                 });
 
             modelBuilder.Entity("DiplomaApp.Models.OfferPrice", b =>
@@ -513,7 +552,16 @@ namespace DiplomaApp.Migrations
 
             modelBuilder.Entity("DiplomaApp.Models.Marketplace", b =>
                 {
+                    b.Navigation("CatalogPage")
+                        .IsRequired();
+
                     b.Navigation("Categories");
+
+                    b.Navigation("CategoryPage")
+                        .IsRequired();
+
+                    b.Navigation("OfferPage")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("DiplomaApp.Models.Offer", b =>

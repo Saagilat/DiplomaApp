@@ -5,27 +5,40 @@ namespace DiplomaApp.ViewModels
 {
     public class OfferDetails
     {
-        public Offer Offer { get; set; }
+
         public string MarketplaceName { get; set; }
         public string MarketplaceUrl { get; set; }
         public string CategoryName { get; set; }
         public string CategoryUrl { get; set; }
-        public IPagedList<OfferIndex> SimilliarOffers { get; set; }
-        public List<ChartDataPoint> ChartPrices { get; set; }
-        public List<ChartDataPoint> ChartPricesPromotional { get; set; }
+        public string OfferName { get; set; }
+        public string OfferUrl { get; set; }
+
+        public List<OfferIndex> SimilliarOffers = new List<OfferIndex>();
+        public string DatasetsJson { get; set; }
+        public List<Dataset> Datasets { get; set; }
         public OfferDetails()
         {
 
         }
     }
-    public class ChartDataPoint
+    public class Dataset
+    {
+        public string label { get; set; }
+
+        public List<DataPoint> data = new List<DataPoint>();
+        public string borderColor {get; set;}
+        public Dataset()
+        {
+
+        }
+    }
+    public class DataPoint
     {
         public DateTime x { get; set; }
         public double y { get; set; }
-        public ChartDataPoint(DateTime x, double y)
+        public DataPoint()
         {
-            this.x = x;
-            this.y = y;
+
         }
     }
 }

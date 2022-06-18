@@ -6,87 +6,75 @@ namespace DiplomaApp.Models
     public class Marketplace
     {
         public int Id { get; set; }
+        [Display(Name = "Название маркетплейса")]
         public string Name { get; set; }
-        public string UrlBase { get; set; }
-        public string UrlCategories { get; set; }
-
-        public string XPathCategories { get; set; }
-
-        public string XPathCategoryUrl { get; set; }
-        public string? AttributeCategoryUrl { get; set; }
-
-        public string XPathCategoryName { get; set; }
-        public string? AttributeCategoryName { get; set; }
-
-        public string XPathOffers { get; set; }
-
-        public string XPathOfferUrl { get; set; }
-        public string? AttributeOfferUrl { get; set; }
-
-        public string XPathOfferName { get; set; }
-        public string? AttributeOfferName { get; set; }
-
-        public string XPathOfferPrice { get; set; }
-        public string? AttributeOfferPrice { get; set; }
-
-        public string XPathOfferPricePromotional { get; set; }
-        public string? AttributeOfferPricePromotional { get; set; }
-
-        public string XPathNextPageUrl { get; set; }
-        public string? AttributeNextPageUrl { get; set; }
-
-        public DateTime CategoriesCheckDate { get; set; }
+        [Display(Name = "URL маркетплейса")]
+        public string Url { get; set; }
+        public CatalogPage CatalogPage { get; set; }
+        public CategoryPage CategoryPage { get; set; }
+        public OfferPage OfferPage { get; set; }
 
         public ICollection<Category> Categories = new List<Category>();
         public Marketplace()
         {
         }
     }
-
-    public class Category
+    public class CatalogPage
     {
-        public int Id { get; set; }
-        public string Url { get; set; }
-        public string Name { get; set; }
-        public DateTime CheckDate { get; set; }
-        public DateTime OffersCheckDate { get; set; }
-        public string? LastParsedPageUrl { get; set; }
         public Marketplace Marketplace { get; set; }
         public int MarketplaceId { get; set; }
-
-        public ICollection<Offer> Offers = new List<Offer>();
-        public Category()
-        {
-        }
-    }
-    public class Offer
-    {
-        public int Id { get; set; }
+        [Display(Name = "URL каталога")]
+        public string UrlMarketplace { get; set; }
         public string Url { get; set; }
-        public string Name { get; set; }
-        public float Price { get; set; }
-        public float PricePromotional { get; set; }
+        [Display(Name = "XPathCategories каталога")]
+        public string XPathCategories { get; set; }
+        [Display(Name = "XPathUrl каталога")]
+        public string XPathUrl { get; set; }
+        [Display(Name = "AttributeUrl каталога")]
+        public string AttributeUrl { get; set; }
+        [Display(Name = "XPathName каталога")]
+        public string XPathName { get; set; }
         public DateTime CheckDate { get; set; }
-        public Category Category { get; set; }
-        public int CategoryId { get; set; }
-
-        public ICollection<OfferPrice> OfferPrices = new List<OfferPrice>();
-
-        public Offer()
+        public CatalogPage()
         {
+
         }
     }
-
-    public class OfferPrice
+    public class CategoryPage
     {
-        public float Price { get; set; }
-        public float PricePromotional { get; set; }
-        public DateTime CheckDate { get; set; }
-        public Offer Offer { get; set; }
-        public int OfferId { get; set; }
+        public Marketplace Marketplace { get; set; }
+        public int MarketplaceId { get; set; }
+        [Display(Name = "URL категории")]
+        public string UrlMarketplace { get; set; }
+        [Display(Name = "XPathOffers категории")]
+        public string XPathOffers { get; set; }
+        [Display(Name = "XPathUrl категории")]
+        public string XPathUrl { get; set; }
+        [Display(Name = "AttributeUrl категории")]
+        public string AttributeUrl { get; set; }
+        [Display(Name = "XPathName категории")]
+        public string XPathName { get; set; }
+        [Display(Name = "XPathPrice категории")]
+        public string XPathPrice { get; set; }
+        [Display(Name = "XPathNextPageUrl категории")]
+        public string XPathNextPageUrl { get; set; }
+        [Display(Name = "AttributeNextPageUrl категории")]
+        public string AttributeNextPageUrl { get; set; }
+        public CategoryPage()
+        {
 
-
-        public OfferPrice()
+        }
+    }
+    public class OfferPage
+    {
+        public Marketplace Marketplace { get; set; }
+        public int MarketplaceId { get; set; }
+        public string UrlMarketplace { get; set; }
+        [Display(Name = "XPathName товара")]
+        public string XPathName { get; set; }
+        [Display(Name = "XPathPrice товара")]
+        public string XPathPrice { get; set; }
+        public OfferPage()
         {
 
         }
