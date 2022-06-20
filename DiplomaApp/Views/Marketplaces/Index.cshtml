@@ -1,4 +1,5 @@
-﻿@model IEnumerable<DiplomaApp.Models.Marketplace>
+﻿@using DiplomaApp.Core
+@model IEnumerable<DiplomaApp.Models.Marketplace>
 
 @{
     ViewData["Title"] = "Маркетплейсы";
@@ -6,9 +7,13 @@
 
 <h1>@ViewData["Title"]</h1>
 
-<p>
-    <a asp-action="Create">Добавить</a>
-</p>
+@if (User.IsInRole(Constants.administrator))
+{
+    <div class="row">
+        <a asp-action="Create">Добавить</a>
+        <a asp-action="GetOffersAllMarketplaces">Обновить все маркетплейсы</a>
+    </div>
+}
 
 <div>
     @{ Html.RenderPartial("~/Views/Marketplaces/PartialRender/IndexTable.cshtml", Model); }

@@ -12,6 +12,7 @@ namespace DiplomaApp.ViewModels
         public string CategoryUrl { get; set; }
         public string OfferName { get; set; }
         public string OfferUrl { get; set; }
+        public DateTime OfferCreationDate { get; set; }
 
         public List<OfferIndex> SimilliarOffers = new List<OfferIndex>();
         public string DatasetsJson { get; set; }
@@ -27,6 +28,13 @@ namespace DiplomaApp.ViewModels
 
         public List<DataPoint> data = new List<DataPoint>();
         public string borderColor {get; set;}
+        public Dictionary<string, string> trendlineLinear = new Dictionary<string, string>
+        {
+            {"projection:", "true"},
+            {"lineStyle", "dotted" },
+            {"width:", "1" }
+        };
+
         public Dataset()
         {
 

@@ -1,66 +1,73 @@
 ﻿@model DiplomaApp.ViewModels.OfferDetails
 @if(Model.DatasetsJson != null)
 {
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <div class="btn-group mt-2" role="group" aria-label="Период">
+                <input type="radio" class="btn-check" name="chartPeriod" id="dayMin" autocomplete="off" onclick="updateChartMin(chart, 'hour', dayAgo)"/>
+                <label class="btn btn-outline-primary" for="dayMin">День</label>
+                
+                <input type="radio" class="btn-check" name="chartPeriod" id="weekMin" autocomplete="off" onclick="updateChartMin(chart, 'day', weekAgo)"/>
+                <label class="btn btn-outline-primary" for="weekMin">Неделя</label>
 
-<div class="btn-group" role="group" aria-label="Период">
-    <input type="radio" class="btn-check" name="chartPeriod" id="dayButton" autocomplete="off" onclick="updateChart(chart, dayAgo, 'minute')" checked/>
-    <label class="btn btn-outline-primary" for="dayButton">Сутки</label>
+                <input type="radio" class="btn-check" name="chartPeriod" id="monthMin" autocomplete="off" onclick="updateChartMin(chart, 'day', monthAgo)"/>
+                <label class="btn btn-outline-primary" for="monthMin">Месяц</label>
+            
+                <input type="radio" class="btn-check" name="chartPeriod" id="yearMin" autocomplete="off" onclick="updateChartMin(chart, 'month', yearAgo)"/>
+                <label class="btn btn-outline-primary" for="yearMin">Год</label>
 
-    <input type="radio" class="btn-check" name="chartPeriod" id="weekButton" autocomplete="off" onclick="updateChart(chart, weekAgo, 'day')"/>
-    <label class="btn btn-outline-primary" for="weekButton">Неделя</label>
-
-    <input type="radio" class="btn-check" name="chartPeriod" id="monthButton" autocomplete="off" onclick="updateChart(chart, monthAgo, 'day')"/>
-    <label class="btn btn-outline-primary" for="monthButton">Месяц</label>
-
-    <input type="radio" class="btn-check" name="chartPeriod" id="yearButton" autocomplete="off" onclick="updateChart(chart, yearAgo, 'month')"/>
-    <label class="btn btn-outline-primary" for="yearButton">Год</label>
+                <input type="radio" class="btn-check" name="chartPeriod" id="creationMin" autocomplete="off" onclick="updateChartMin(chart, '', '')" checked/>
+                <label class="btn btn-outline-primary" for="creationMin">Всё время</label>
+            </div>
+        </div>
+    </div>
 </div>
-<div class="mt-3 mb-3">
+<div>
     <canvas id="offerPricesChart" height="100"></canvas>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js@3.5.0/dist/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@1.1.1/dist/chartjs-plugin-zoom.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.8.0/dist/chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.18.1/min/moment-with-locales.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-adapter-moment/1.0.0/chartjs-adapter-moment.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-trendline"></script>
 <script>
-    var now = @Json.Serialize(DateTime.UtcNow.AddMinutes(1));
+    moment.locale("ru");
+    var hourAgo = @Json.Serialize(DateTime.UtcNow.AddHours(-1));
     var dayAgo = @Json.Serialize(DateTime.UtcNow.AddDays(-1));
     var weekAgo = @Json.Serialize(DateTime.UtcNow.AddDays(-7));
     var monthAgo = @Json.Serialize(DateTime.UtcNow.AddMonths(-1));
     var yearAgo = @Json.Serialize(DateTime.UtcNow.AddYears(-1));
+    var now = @Json.Serialize(DateTime.UtcNow);
     var datasets = JSON.parse('@Html.Raw(Model.DatasetsJson)');
 
     const ctx = document.getElementById('offerPricesChart').getContext('2d');
     var chart = new Chart(ctx, {
          type: 'line',
          data: {
-             datasets: datasets
+             datasets: datasets,
          },
          options: {
              scales: {
                  x: {
-                    min: dayAgo,
                     max: now,
                     type: 'time',
                     time: {
-                      unit: 'minute',
-                      tooltipFormat: 'DD.MM.YYYY HH:mm:ss'
+                      tooltipFormat: 'dd.MM.yyyy HH:mm:ss',
+                      displayFormats: {
+                            hour: 'HH:mm',
+                            minute: 'HH:mm',
+                            second: 'mm:ss'
+                      }
                     }
                   },
-                 y: {
-                     min: (@ViewData["MinPrice"] - (@ViewData["MaxPrice"] - @ViewData["MinPrice"]) * 0.1 - 1),
-                     max: (@ViewData["MaxPrice"] + (@ViewData["MaxPrice"] - @ViewData["MinPrice"]) * 0.1 + 1),
-                 }
-             }
+             },
          }          
      });
     onload = function()
     {
         chart.render();
     }
-    function updateChart(chart, minDate, unit)
+    function updateChartMin(chart, unit, minDate)
     {
         chart.options.scales.x.min = minDate;
         chart.options.scales.x.time.unit = unit;

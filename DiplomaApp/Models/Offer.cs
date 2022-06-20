@@ -8,6 +8,7 @@
         public string Url { get; set; }
         public string Name { get; set; }
         public float Price { get; set; }
+        public DateTime CreationDate { get; set; }
         public DateTime CheckDate { get; set; }
 
         public ICollection<OfferPrice> OfferPrices = new List<OfferPrice>();

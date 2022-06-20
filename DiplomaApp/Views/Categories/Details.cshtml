@@ -1,14 +1,21 @@
-﻿@model DiplomaApp.ViewModels.CategoryDetails
+﻿@using DiplomaApp.Core
+@model DiplomaApp.ViewModels.CategoryDetails
 
 @{
     ViewData["Title"] = @Model.Category.Name;
 }
+
+@{
+Html.RenderPartial("~/Views/Categories/PartialRender/DetailsForm.cshtml", Model);
+}
+@if (User.IsInRole(Constants.administrator))
+{
 <div>
-    @{ Html.RenderPartial("~/Views/Categories/PartialRender/DetailsForm.cshtml", Model); }
     <a asp-controller="Marketplaces" asp-action="GetCategoryOffers" asp-route-id="@Model.Category.Id">Обновить предложения</a>
 </div>
+}
 <div>
-    @{ Html.RenderPartial("~/Views/Offers/PartialRender/IndexTable.cshtml", Model.Offers); }
+ @{ Html.RenderPartial("~/Views/Offers/PartialRender/IndexTable.cshtml", Model.Offers); }
 </div>
 <div>
     <a asp-controller="Categories" asp-action="Index">Назад к списку</a>

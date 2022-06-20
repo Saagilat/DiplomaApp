@@ -152,6 +152,7 @@ namespace DiplomaApp.WebScraper
                 price = float.Parse(priceString, CultureInfo.InvariantCulture);
                 result.Price = price;
                 result.Name = name;
+                Console.WriteLine(name + ": " + price);
             }
             return result;
         }

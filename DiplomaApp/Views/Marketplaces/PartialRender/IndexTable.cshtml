@@ -7,15 +7,18 @@
 
 <div class="mt-3 mb-3">
     <form>
-        <input type="text" class="form-control mt-3" id="name" name="name" value="@currentName" placeholder="Название">
+        <input type="text" class="form-control mt-3" id="name" name="name" value="@currentName" placeholder="Марктеплейс">
         <input class="form-control mt-3" type="submit" value="Найти" />
     </form>
     <div class="mt-3">
+        <b>@Model.LastItemOnPage из @Model.TotalItemCount</b>
         @Html.PagedListPager(Model, page => (Url.Action(ViewContext.RouteData.Values["action"].ToString(), 
         new {
             id=ViewContext.RouteData.Values["id"],
             page=page})),
         new X.PagedList.Web.Common.PagedListRenderOptions {
+            DisplayLinkToLastPage = X.PagedList.Web.Common.PagedListDisplayMode.IfNeeded,
+            LinkToLastPageFormat = "{0}",
             LiElementClasses = new string[] { "page-item" },
             PageClasses = new string[] { "page-link" }
         })
@@ -48,14 +51,17 @@
             }
         </tbody>
     </table>
+    <b>@Model.LastItemOnPage из @Model.TotalItemCount</b>
      @Html.PagedListPager(Model, page => (Url.Action(ViewContext.RouteData.Values["action"].ToString(), 
      new {
-         id=ViewContext.RouteData.Values["id"],
-         page=page})),
-     new X.PagedList.Web.Common.PagedListRenderOptions {
-         LiElementClasses = new string[] { "page-item" },
-         PageClasses = new string[] { "page-link" }
-     })
+        id=ViewContext.RouteData.Values["id"],
+        page=page})),
+        new X.PagedList.Web.Common.PagedListRenderOptions {
+            DisplayLinkToLastPage = X.PagedList.Web.Common.PagedListDisplayMode.IfNeeded,
+            LinkToLastPageFormat = "{0}",
+            LiElementClasses = new string[] { "page-item" },
+            PageClasses = new string[] { "page-link" }
+        })
  </div>
 <script>
     $(document).ready(function () {

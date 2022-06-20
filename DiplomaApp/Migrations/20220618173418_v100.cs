@@ -173,6 +173,7 @@ namespace DiplomaApp.Migrations
                 columns: table => new
                 {
                     MarketplaceId = table.Column<int>(type: "int", nullable: false),
+                    UrlMarketplace = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Url = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     XPathCategories = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     XPathUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -219,7 +220,7 @@ namespace DiplomaApp.Migrations
                 columns: table => new
                 {
                     MarketplaceId = table.Column<int>(type: "int", nullable: false),
-                    Url = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UrlMarketplace = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     XPathOffers = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     XPathUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     AttributeUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -244,6 +245,7 @@ namespace DiplomaApp.Migrations
                 columns: table => new
                 {
                     MarketplaceId = table.Column<int>(type: "int", nullable: false),
+                    UrlMarketplace = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     XPathName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     XPathPrice = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
@@ -268,6 +270,7 @@ namespace DiplomaApp.Migrations
                     Url = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Price = table.Column<float>(type: "real", nullable: false),
+                    CreationDate = table.Column<DateTime>(type: "datetime", nullable: false),
                     CheckDate = table.Column<DateTime>(type: "datetime", nullable: false)
                 },
                 constraints: table =>

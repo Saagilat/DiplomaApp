@@ -19,6 +19,7 @@ namespace DiplomaApp.Controllers
     public class MarketplacesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private static object GetOfferAllMarketplacesLock = new object();
 
         public MarketplacesController(ApplicationDbContext context)
         {
@@ -41,6 +42,7 @@ namespace DiplomaApp.Controllers
             var marketplacesPage = marketplaces.ToPagedList(page, Constants.recordsPerPage);
             return View(marketplacesPage);
         }
+
         // GET: Marketplaces/Details/5
         public async Task<IActionResult> Details(int id, string name, int page=1)
         {
@@ -75,6 +77,7 @@ namespace DiplomaApp.Controllers
 
         }
         // GET: Marketplaces/Create
+        [Authorize(Roles = Constants.administrator)]
         public IActionResult Create()
         {
             return View();
@@ -85,6 +88,7 @@ namespace DiplomaApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = Constants.administrator)]
         public async Task<IActionResult> Create(MarketplaceEdit marketplaceEdit)
         {
 
@@ -134,6 +138,7 @@ namespace DiplomaApp.Controllers
         }
 
         // GET: Marketplaces/Edit/5
+        [Authorize(Roles = Constants.administrator)]
         public async Task<IActionResult> Edit(int id)
         {
             if (id == null || _context.Marketplace == null)
@@ -183,6 +188,7 @@ namespace DiplomaApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = Constants.administrator)]
         public async Task<IActionResult> Edit(int id, MarketplaceEdit marketplaceEdit)
         {
             if (ModelState.IsValid)
@@ -231,6 +237,7 @@ namespace DiplomaApp.Controllers
         }
 
         // GET: Marketplaces/Delete/5
+        [Authorize(Roles = Constants.administrator)]
         public async Task<IActionResult> Delete(int id)
         {
             if (id == null || _context.Marketplace == null)
@@ -250,6 +257,7 @@ namespace DiplomaApp.Controllers
         // POST: Marketplaces/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = Constants.administrator)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             if (_context.Marketplace == null)
@@ -265,7 +273,7 @@ namespace DiplomaApp.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
-
+        [Authorize(Roles = Constants.administrator)]
         public async Task<IActionResult> GetCategoryOffers(int id, DateTime? startDateTime = null)
         {
             if (!_context.Category.Any(c => c.Id == id))
@@ -317,6 +325,7 @@ namespace DiplomaApp.Controllers
                     {
                         parsedOffer.CategoryId = category.Id;
                         parsedOffer.Category = category;
+                        parsedOffer.CreationDate = parsedOffer.CheckDate;
                         _context.Add(parsedOffer);
                         if (!_context.OfferPrice.Any(c => c.OfferId == parsedOffer.Id && c.CheckDate == parsedOffer.CheckDate))
                         {
@@ -326,13 +335,21 @@ namespace DiplomaApp.Controllers
                 }
                 pageUrl = scrapeResult.NextPageUrl;
                 category.LastParsedPageUrl = pageUrl;
-                _context.SaveChanges();
+                try
+                {
+                    _context.SaveChanges();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
             }
 
             _context.SaveChanges();
 
             return RedirectToAction("Details", "Categories", new { id = id });
         }
+        [Authorize(Roles = Constants.administrator)]
         public async Task<IActionResult> GetOffers(int id, DateTime? startDateTime = null)
         {
             if (!MarketplaceExists(id))
@@ -359,7 +376,7 @@ namespace DiplomaApp.Controllers
             }
             return RedirectToAction("Details", new { id = id });
         }
-
+        [Authorize(Roles = Constants.administrator)]
         public async Task<IActionResult> GetCategories(int id)
         {
 
@@ -392,13 +409,22 @@ namespace DiplomaApp.Controllers
                     }
                 }
 
-                _context.SaveChanges();
+                try
+                {
+                    _context.SaveChanges();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
             }
 
             return RedirectToAction("Details", new { id = id });
         }
+        [Authorize(Roles = Constants.administrator)]
         public async Task<IActionResult> GetOffersAllMarketplaces()
         {
+
             var marketplaces = _context.Marketplace.Select(c => c.Id);
             DateTime startDateTime = DateTime.UtcNow;
             int iteratorMarketplacesId = marketplaces.Min();

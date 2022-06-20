@@ -2,10 +2,11 @@
 using Microsoft.EntityFrameworkCore;
 using DiplomaApp.Models;
 using DiplomaApp.Core;
+using Microsoft.AspNetCore.Identity;
 
 namespace DiplomaApp.Data
 {
-    public class ApplicationDbContext : IdentityDbContext
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -51,6 +52,8 @@ namespace DiplomaApp.Data
                 .HasForeignKey(c => c.CategoryId);
             modelBuilder.Entity<Offer>()
                 .Property(p => p.CheckDate).HasColumnType("datetime");
+            modelBuilder.Entity<Offer>()
+                .Property(p => p.CreationDate).HasColumnType("datetime");
 
             modelBuilder.Entity<OfferPrice>()
                 .HasKey(p => new { p.OfferId, p.CheckDate });

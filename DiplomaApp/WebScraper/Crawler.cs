@@ -1,6 +1,7 @@
 ﻿using DiplomaApp.Models;
 using HtmlAgilityPack;
 using DiplomaApp.Core;
+using static Useragents.Collection;
 using static DiplomaApp.WebScraper.Parser;
 
 namespace DiplomaApp.WebScraper
@@ -17,43 +18,62 @@ namespace DiplomaApp.WebScraper
                 Categories = new List<Category>();
             }
         }
-        public static async Task<Offer> ScrapeOfferPage(string url, OfferPage offerPage)
+        public static async Task<Offer> ScrapeOfferPage(string url, OfferPage offerPage, int minWait = Constants.minWaitMilliseconds, int maxWait = Constants.maxWaitMilliseconds)
         {
             Offer result = new Offer();
+            Random random = new Random();
             using var client = new HttpClient();
-            var response = await client.GetAsync(url);
-            Console.WriteLine(url + ">---->" + response.StatusCode);
-            if (response.IsSuccessStatusCode)
+            client.DefaultRequestHeaders.UserAgent.ParseAdd(GetRandomDesktop());
+            try
             {
-                var checkDate = DateTime.UtcNow;
-                var responseContent = await response.Content.ReadAsStringAsync();
-                var htmlDocument = new HtmlDocument();
-                htmlDocument.LoadHtml(responseContent);
-                result = ParseOfferFromOfferPage(htmlDocument, offerPage);
-                result.CheckDate = checkDate;
+                var response = await client.GetAsync(url);
+                Console.WriteLine(url + ">---->" + response.StatusCode);
+                if (response.IsSuccessStatusCode)
+                {
+                    var checkDate = DateTime.UtcNow;
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var htmlDocument = new HtmlDocument();
+                    htmlDocument.LoadHtml(responseContent);
+                    result = ParseOfferFromOfferPage(htmlDocument, offerPage);
+                    result.CheckDate = checkDate;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
             }
             return result;
         }
-        public static async Task<CatalogPageScrapeResult> ScrapeCatalogPage(CatalogPage catalogPage)
+        public static async Task<CatalogPageScrapeResult> ScrapeCatalogPage(CatalogPage catalogPage, int minWait = Constants.minWaitMilliseconds, int maxWait = Constants.maxWaitMilliseconds)
         {
             CatalogPageScrapeResult result = new CatalogPageScrapeResult();
+            Random random = new Random();
             using var client = new HttpClient();
-            var response = await client.GetAsync(catalogPage.Url);
-            Console.WriteLine(catalogPage.Url + ">---->" + response.StatusCode);
-            if (response.IsSuccessStatusCode)
+            client.DefaultRequestHeaders.UserAgent.ParseAdd(GetRandomDesktop());
+            try
             {
-                result.ResponseSuccesful = true;
-                var checkDate = DateTime.UtcNow;
-                var responseContent = await response.Content.ReadAsStringAsync();
-                var htmlDocument = new HtmlDocument();
-                htmlDocument.LoadHtml(responseContent);
-                var parsedCategories = ParseCatalogPage(htmlDocument, catalogPage);
-                foreach(var category in parsedCategories)
+                var response = await client.GetAsync(catalogPage.Url);
+                Console.WriteLine(catalogPage.Url + ">---->" + response.StatusCode);
+                if (response.IsSuccessStatusCode)
                 {
-                    category.CheckDate = checkDate;
-                    Console.WriteLine("    " + category.Url);
+                    result.ResponseSuccesful = true;
+                    var checkDate = DateTime.UtcNow;
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var htmlDocument = new HtmlDocument();
+                    htmlDocument.LoadHtml(responseContent);
+                    var parsedCategories = ParseCatalogPage(htmlDocument, catalogPage);
+                    foreach (var category in parsedCategories)
+                    {
+                        category.CheckDate = checkDate;
+                        Console.WriteLine("    " + category.Url);
+                    }
+                    result.Categories.AddRange(parsedCategories);
                 }
-                result.Categories.AddRange(parsedCategories);
+                Thread.Sleep(random.Next(minWait, maxWait));
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex);
             }
             return result;
         }
@@ -76,24 +96,33 @@ namespace DiplomaApp.WebScraper
             CategoryPageScrapeResult result = new CategoryPageScrapeResult();
             Random random = new Random();
             using var client = new HttpClient();
-            var response = await client.GetAsync(url);
-            Console.WriteLine(url + " >-> " + response.StatusCode);
-            if (response.IsSuccessStatusCode)
+            client.DefaultRequestHeaders.UserAgent.ParseAdd(GetRandomDesktop());
+            
+            try
             {
-                result.ResponseSuccesful = true;
-                var checkDate = DateTime.UtcNow;
-                var responseContent = await response.Content.ReadAsStringAsync();
-                HtmlDocument htmlDocument = new HtmlDocument();
-                htmlDocument.LoadHtml(responseContent);
-                var parsedOffers = ParseCategoryPage(htmlDocument, categoryPage);
-                foreach (var offer in parsedOffers)
+                var response = await client.GetAsync(url);
+                Console.WriteLine(url + " >-> " + response.StatusCode);
+                if (response.IsSuccessStatusCode)
                 {
-                    offer.CheckDate = checkDate;
+                    result.ResponseSuccesful = true;
+                    var checkDate = DateTime.UtcNow;
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    HtmlDocument htmlDocument = new HtmlDocument();
+                    htmlDocument.LoadHtml(responseContent);
+                    var parsedOffers = ParseCategoryPage(htmlDocument, categoryPage);
+                    foreach (var offer in parsedOffers)
+                    {
+                        offer.CheckDate = checkDate;
+                    }
+                    result.Offers.AddRange(parsedOffers);
+                    result.NextPageUrl = ParseCategoryPageNextUrl(htmlDocument, categoryPage);
                 }
-                result.Offers.AddRange(parsedOffers);
-                result.NextPageUrl = ParseCategoryPageNextUrl(htmlDocument, categoryPage);
+                Thread.Sleep(random.Next(minWait, maxWait));
             }
-            Thread.Sleep(random.Next(minWait, maxWait));
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
             return result;
         }
     }

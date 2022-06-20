@@ -1,16 +1,22 @@
-﻿@model DiplomaApp.ViewModels.MarketplaceDetails;
+﻿@using DiplomaApp.Core
+@model DiplomaApp.ViewModels.MarketplaceDetails;
 
 @{
     ViewData["Title"] = "Подробности";
 }
 <div>
-    @{ Html.RenderPartial("~/Views/Marketplaces/PartialRender/DetailsForm.cshtml", Model.Marketplace); }
-    <div class="row">
-        <a asp-controller="Marketplaces" asp-action="Edit" asp-route-id="@Model.Marketplace.Id">Изменить</a>
-        <a asp-controller="Marketplaces" asp-action="Delete" asp-route-id="@Model.Marketplace.Id">Удалить</a>
-        <a asp-controller="Marketplaces" asp-action="GetCategories" asp-route-id="@Model.Marketplace.Id">Обновить категории</a>
-        <a asp-controller="Marketplaces" asp-action="GetOffers" asp-route-id="@Model.Marketplace.Id">Обновить предложения</a>
-    </div>
+    @{
+        Html.RenderPartial("~/Views/Marketplaces/PartialRender/DetailsForm.cshtml", Model.Marketplace);
+    }
+    @if (User.IsInRole(Constants.administrator))
+    {
+        <div class="row">
+            <a asp-controller="Marketplaces" asp-action="Edit" asp-route-id="@Model.Marketplace.Id">Изменить</a>
+            <a asp-controller="Marketplaces" asp-action="Delete" asp-route-id="@Model.Marketplace.Id">Удалить</a>
+            <a asp-controller="Marketplaces" asp-action="GetCategories" asp-route-id="@Model.Marketplace.Id">Обновить категории</a>
+            <a asp-controller="Marketplaces" asp-action="GetOffers" asp-route-id="@Model.Marketplace.Id">Обновить предложения</a>
+        </div>
+    }
 </div>
 <div>
     @{ Html.RenderPartial("~/Views/Categories/PartialRender/IndexTable.cshtml", Model.Categories); }

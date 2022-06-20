@@ -11,7 +11,6 @@ using DiplomaApp.WebScraper;
 using DiplomaApp.ViewModels;
 using DiplomaApp.Core;
 using X.PagedList;
-using FuzzySharp;
 using Microsoft.AspNetCore.Authorization;
 
 namespace DiplomaApp.Controllers
@@ -121,6 +120,7 @@ namespace DiplomaApp.Controllers
 
             return View(viewModel);
         }
+        [Authorize(Roles = Constants.administrator)]
         public async Task<IActionResult> Delete(int id)
         {
             if (id == null || _context.Category == null)
@@ -140,6 +140,7 @@ namespace DiplomaApp.Controllers
         // POST: Categories/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = Constants.administrator)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             if (_context.Category == null)
