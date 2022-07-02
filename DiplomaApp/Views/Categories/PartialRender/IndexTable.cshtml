@@ -1,13 +1,13 @@
-﻿@model X.PagedList.PagedList<DiplomaApp.ViewModels.CategoryIndex>
+﻿@model X.PagedList.PagedList<DiplomaApp.ViewModels.CategoryViewModel>
 @using X.PagedList.Mvc.Core;
 @{
         var query = Context.Request.Query;
         var currentMarketplace = query["marketplace"].ToString() == "" ? ViewData["Marketplace"] : query["marketplace"];
         var currentName = query["name"].ToString() == "" ? ViewData["Name"] : query["name"];
 }
-<div class="mt-3 mb-3">
+<div>
     <form>
-        <input type="text" class="form-control mt-3" id="name" name="name" value="@currentName" placeholder="Категория">
+        <input type="text" class="form-control" id="name" name="name" value="@currentName" placeholder="Категория">
         <input type="text" class="form-control mt-3" id="marketplace" name="marketplace" value="@currentMarketplace" placeholder="Маркетплейс">
         <select class="form-control mt-3" name="order" >
             <option disabled selected>Сортировка</option>
@@ -43,9 +43,6 @@
                 <th>
                     Маркетплейс
                 </th>
-                <th>
-                    Дата проверки
-                </th>
             </tr>
         </thead>
         <tbody>
@@ -55,16 +52,13 @@
                 {
                     <tr>
                         <td>
-                            <a asp-controller="Categories" asp-action="Details" asp-route-id="@item.Category.Id">@Html.DisplayFor(modelItem => item.Category.Name)</a>
+                            <a asp-controller="Categories" asp-action="Details" asp-route-id="@item.Id">@Html.DisplayFor(modelItem => item.Name)</a>
                         </td>
                         <td>
-                            <a href=@item.Category.Url>@Html.DisplayFor(modelItem => item.Category.Url)</a>
+                            <a href=@item.Url>@Html.DisplayFor(modelItem => item.Url)</a>
                         </td>
                         <td>
                             <a href=@item.MarketplaceUrl>@Html.DisplayFor(modelItem => item.MarketplaceName)</a>
-                        </td>
-                        <td>
-                            <div class="date">@item.Category.CheckDate.ToString("yyyy-MM-dd HH:mm:ss")</div>
                         </td>
                     </tr>
                 }

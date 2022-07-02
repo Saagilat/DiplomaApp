@@ -63,6 +63,35 @@ namespace DiplomaApp.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Request",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Theme = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Text = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreationDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Request", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "RequestStatus",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RequestStatus", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -169,7 +198,7 @@ namespace DiplomaApp.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "CatalogPage",
+                name: "CatalogMap",
                 columns: table => new
                 {
                     MarketplaceId = table.Column<int>(type: "int", nullable: false),
@@ -183,9 +212,9 @@ namespace DiplomaApp.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CatalogPage", x => x.MarketplaceId);
+                    table.PrimaryKey("PK_CatalogMap", x => x.MarketplaceId);
                     table.ForeignKey(
-                        name: "FK_CatalogPage_Marketplace_MarketplaceId",
+                        name: "FK_CatalogMap_Marketplace_MarketplaceId",
                         column: x => x.MarketplaceId,
                         principalTable: "Marketplace",
                         principalColumn: "Id",
@@ -216,7 +245,7 @@ namespace DiplomaApp.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "CategoryPage",
+                name: "CategoryMap",
                 columns: table => new
                 {
                     MarketplaceId = table.Column<int>(type: "int", nullable: false),
@@ -231,9 +260,9 @@ namespace DiplomaApp.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CategoryPage", x => x.MarketplaceId);
+                    table.PrimaryKey("PK_CategoryMap", x => x.MarketplaceId);
                     table.ForeignKey(
-                        name: "FK_CategoryPage_Marketplace_MarketplaceId",
+                        name: "FK_CategoryMap_Marketplace_MarketplaceId",
                         column: x => x.MarketplaceId,
                         principalTable: "Marketplace",
                         principalColumn: "Id",
@@ -241,7 +270,7 @@ namespace DiplomaApp.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "OfferPage",
+                name: "OfferMap",
                 columns: table => new
                 {
                     MarketplaceId = table.Column<int>(type: "int", nullable: false),
@@ -251,11 +280,36 @@ namespace DiplomaApp.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_OfferPage", x => x.MarketplaceId);
+                    table.PrimaryKey("PK_OfferMap", x => x.MarketplaceId);
                     table.ForeignKey(
-                        name: "FK_OfferPage_Marketplace_MarketplaceId",
+                        name: "FK_OfferMap_Marketplace_MarketplaceId",
                         column: x => x.MarketplaceId,
                         principalTable: "Marketplace",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "RequestRequestStatus",
+                columns: table => new
+                {
+                    RequestId = table.Column<int>(type: "int", nullable: false),
+                    RequestStatusId = table.Column<int>(type: "int", nullable: false),
+                    CreationDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RequestRequestStatus", x => new { x.RequestId, x.RequestStatusId, x.CreationDate });
+                    table.ForeignKey(
+                        name: "FK_RequestRequestStatus_Request_RequestId",
+                        column: x => x.RequestId,
+                        principalTable: "Request",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_RequestRequestStatus_RequestStatus_RequestStatusId",
+                        column: x => x.RequestStatusId,
+                        principalTable: "RequestStatus",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -301,6 +355,21 @@ namespace DiplomaApp.Migrations
                         principalTable: "Offer",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: "AspNetRoles",
+                columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
+                values: new object[] { "1", "31d88389-1ee3-4d8f-bb60-e8956290c1e8", "Administrator", null });
+
+            migrationBuilder.InsertData(
+                table: "RequestStatus",
+                columns: new[] { "Id", "Description", "Name" },
+                values: new object[,]
+                {
+                    { 1, "", "Ожидает" },
+                    { 2, "", "В обработке" },
+                    { 3, "", "Отклонено" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -351,6 +420,11 @@ namespace DiplomaApp.Migrations
                 name: "IX_Offer_CategoryId",
                 table: "Offer",
                 column: "CategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RequestRequestStatus_RequestStatusId",
+                table: "RequestRequestStatus",
+                column: "RequestStatusId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -371,16 +445,19 @@ namespace DiplomaApp.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "CatalogPage");
+                name: "CatalogMap");
 
             migrationBuilder.DropTable(
-                name: "CategoryPage");
+                name: "CategoryMap");
 
             migrationBuilder.DropTable(
-                name: "OfferPage");
+                name: "OfferMap");
 
             migrationBuilder.DropTable(
                 name: "OfferPrice");
+
+            migrationBuilder.DropTable(
+                name: "RequestRequestStatus");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
@@ -390,6 +467,12 @@ namespace DiplomaApp.Migrations
 
             migrationBuilder.DropTable(
                 name: "Offer");
+
+            migrationBuilder.DropTable(
+                name: "Request");
+
+            migrationBuilder.DropTable(
+                name: "RequestStatus");
 
             migrationBuilder.DropTable(
                 name: "Category");

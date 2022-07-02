@@ -9,7 +9,7 @@
         public const double categoryGetOffersExpirationTimeHours = 24;
         public const double marketplaceGetCategoriesExpirationTimeHours = 24;
         public const double offerExpirationTimeMinutes = 10;
-        public const double parseTimeoutSeconds = 3600;
+        public const double parseTimeoutSeconds = 180;
         public const string nameAsc = "name-asc";
         public const string nameDesc = "name-desc";
         public const string priceAsc = "price-asc";

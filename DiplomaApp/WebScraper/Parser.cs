@@ -8,10 +8,10 @@ namespace DiplomaApp.WebScraper
 {
     public class Parser
     {
-        public static List<Category> ParseCatalogPage(HtmlDocument htmlDocument, CatalogPage catalogPage)
+        public static List<Category> ParseCatalogMap(HtmlDocument htmlDocument, CatalogMap CatalogMap)
         {
             List<Category> result = new List<Category>();
-            var categoryNodes = htmlDocument.DocumentNode.SelectNodes(catalogPage.XPathCategories);
+            var categoryNodes = htmlDocument.DocumentNode.SelectNodes(CatalogMap.XPathCategories);
             if (categoryNodes != null)
             {
                 foreach (var categoryNode in categoryNodes)
@@ -19,10 +19,10 @@ namespace DiplomaApp.WebScraper
                     var parsedCategory = new Category();
                     string url;
                     string name;
-                    url = categoryNode.SelectSingleNode(catalogPage.XPathUrl).GetAttributeValue(catalogPage.AttributeUrl, "");
-                    name = categoryNode.SelectSingleNode(catalogPage.XPathName).InnerText;
+                    url = categoryNode.SelectSingleNode(CatalogMap.XPathUrl).GetAttributeValue("href", "");
+                    name = categoryNode.SelectSingleNode(CatalogMap.XPathName).InnerText;
                     url = HttpUtility.HtmlDecode(url);
-                    url = NormalizeUrl(url, catalogPage.UrlMarketplace);
+                    url = NormalizeUrl(url, CatalogMap.UrlMarketplace);
                     name = name.Trim();
                     parsedCategory.Url = url;
                     parsedCategory.Name = name;
@@ -35,15 +35,15 @@ namespace DiplomaApp.WebScraper
             else
             {
                 Console.WriteLine("CATEGORY NODES == NULL XPathCategories probably incorrect");
-                Console.WriteLine(catalogPage.XPathCategories);
+                Console.WriteLine(CatalogMap.XPathCategories);
             }
             return result;
         }
 
-        public static List<Offer> ParseCategoryPage(HtmlDocument htmlDocument, CategoryPage categoryPage)
+        public static List<Offer> ParseCategoryMap(HtmlDocument htmlDocument, CategoryMap CategoryMap)
         {
             List<Offer> result = new List<Offer>();
-            var offerNodes = htmlDocument.DocumentNode.SelectNodes(categoryPage.XPathOffers);
+            var offerNodes = htmlDocument.DocumentNode.SelectNodes(CategoryMap.XPathOffers);
             if (offerNodes != null)
             {
                 foreach (var offerNode in offerNodes)
@@ -56,33 +56,33 @@ namespace DiplomaApp.WebScraper
                         string name;
                         string priceString;
                         float price;
-                        var urlNode = offerNode.SelectSingleNode(categoryPage.XPathUrl);
-                        var nameNode = offerNode.SelectSingleNode(categoryPage.XPathName);
-                        var priceNode = offerNode.SelectSingleNode(categoryPage.XPathPrice);
+                        var urlNode = offerNode.SelectSingleNode(CategoryMap.XPathUrl);
+                        var nameNode = offerNode.SelectSingleNode(CategoryMap.XPathName);
+                        var priceNode = offerNode.SelectSingleNode(CategoryMap.XPathPrice);
                         if (urlNode == null)
                         {
                             Console.WriteLine("URL NODE == NULL - XPathUrl probably incorrect");
-                            Console.WriteLine(categoryPage.XPathUrl);
+                            Console.WriteLine(CategoryMap.XPathUrl);
                         }
                         if (nameNode == null)
                         {
                             Console.WriteLine("NAME NODE == NULL - XPathName probably incorrect");
-                            Console.WriteLine(categoryPage.XPathName);
+                            Console.WriteLine(CategoryMap.XPathName);
                         }
                         if (priceNode == null)
                         {
                             Console.WriteLine("PRICE NODE == NULL - XPathPrice probably incorrect");
-                            Console.WriteLine(categoryPage.XPathPrice);
+                            Console.WriteLine(CategoryMap.XPathPrice);
                         }
                         if (urlNode != null && nameNode != null && priceNode != null)
                         {
-                            url = urlNode.GetAttributeValue(categoryPage.AttributeUrl, "");
+                            url = urlNode.GetAttributeValue("href", "");
                             name = nameNode.InnerText;
                             priceString = priceNode.InnerText;
                             priceString = HttpUtility.HtmlDecode(priceString);
                             priceString = Regex.Replace(priceString, "[^\\d.]", "");
                             url = HttpUtility.HtmlDecode(url);
-                            url = NormalizeUrl(url, categoryPage.UrlMarketplace);
+                            url = NormalizeUrl(url, CategoryMap.UrlMarketplace);
                             name = HttpUtility.HtmlDecode(name);
                             name = name.Trim();
                             price = float.Parse(priceString, CultureInfo.InvariantCulture);
@@ -101,45 +101,45 @@ namespace DiplomaApp.WebScraper
             else
             {
                 Console.WriteLine("OFFERS NODE == NULL - XPathCategory probably incorrect");
-                Console.WriteLine(categoryPage.XPathOffers);
+                Console.WriteLine(CategoryMap.XPathOffers);
             }
             return result;
         }
-        public static string ParseCategoryPageNextUrl(HtmlDocument htmlDocument, CategoryPage categoryPage)
+        public static string ParseCategoryMapNextUrl(HtmlDocument htmlDocument, CategoryMap CategoryMap)
         {
             string result = "";
-            HtmlNode htmlNode = htmlDocument.DocumentNode.SelectSingleNode(categoryPage.XPathNextPageUrl);
+            HtmlNode htmlNode = htmlDocument.DocumentNode.SelectSingleNode(CategoryMap.XPathNextPageUrl);
             if (htmlNode != null)
             {
-                result = htmlNode.GetAttributeValue(categoryPage.AttributeNextPageUrl, "");
+                result = htmlNode.GetAttributeValue("href", "");
             }
             else
             {
                 Console.WriteLine("NEXT PAGE URL NODE == NULL - end of category, or categoryXPathNextPageUrl incorrect");
-                Console.WriteLine(categoryPage.XPathNextPageUrl);
+                Console.WriteLine(CategoryMap.XPathNextPageUrl);
             }
             result = HttpUtility.HtmlDecode(result);
-            result = NormalizeUrl(result, categoryPage.UrlMarketplace);
+            result = NormalizeUrl(result, CategoryMap.UrlMarketplace);
             return result;
         }
 
-        public static Offer ParseOfferFromOfferPage(HtmlDocument htmlDocument, OfferPage offerPage)
+        public static Offer ParseOfferFromOfferMap(HtmlDocument htmlDocument, OfferMap OfferMap)
         {
             Offer result = new Offer();
-            var nameNode = htmlDocument.DocumentNode.SelectSingleNode(offerPage.XPathName);
-            var priceNode = htmlDocument.DocumentNode.SelectSingleNode(offerPage.XPathPrice);
+            var nameNode = htmlDocument.DocumentNode.SelectSingleNode(OfferMap.XPathName);
+            var priceNode = htmlDocument.DocumentNode.SelectSingleNode(OfferMap.XPathPrice);
             string name;
             string priceString;
             float price;
             if (nameNode == null)
             {
                 Console.WriteLine("OFFER PAGE NAME NODE == NULL - XPathName probably incorrect");
-                Console.WriteLine(offerPage.XPathName);
+                Console.WriteLine(OfferMap.XPathName);
             }
             if (priceNode == null)
             {
                 Console.WriteLine("OFFER PAGE PRICE NODE == NULL - XPathPrice probably incorrect");
-                Console.WriteLine(offerPage.XPathPrice);
+                Console.WriteLine(OfferMap.XPathPrice);
             }
             if (nameNode != null && priceNode != null)
             {

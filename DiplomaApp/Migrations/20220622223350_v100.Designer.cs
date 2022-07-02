@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DiplomaApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20220618173418_v100")]
+    [Migration("20220622223350_v100")]
     partial class v100
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -89,7 +89,7 @@ namespace DiplomaApp.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("DiplomaApp.Models.CatalogPage", b =>
+            modelBuilder.Entity("DiplomaApp.Models.CatalogMap", b =>
                 {
                     b.Property<int>("MarketplaceId")
                         .HasColumnType("int");
@@ -123,7 +123,7 @@ namespace DiplomaApp.Migrations
 
                     b.HasKey("MarketplaceId");
 
-                    b.ToTable("CatalogPage");
+                    b.ToTable("CatalogMap");
                 });
 
             modelBuilder.Entity("DiplomaApp.Models.Category", b =>
@@ -158,7 +158,7 @@ namespace DiplomaApp.Migrations
                     b.ToTable("Category");
                 });
 
-            modelBuilder.Entity("DiplomaApp.Models.CategoryPage", b =>
+            modelBuilder.Entity("DiplomaApp.Models.CategoryMap", b =>
                 {
                     b.Property<int>("MarketplaceId")
                         .HasColumnType("int");
@@ -197,7 +197,7 @@ namespace DiplomaApp.Migrations
 
                     b.HasKey("MarketplaceId");
 
-                    b.ToTable("CategoryPage");
+                    b.ToTable("CategoryMap");
                 });
 
             modelBuilder.Entity("DiplomaApp.Models.Marketplace", b =>
@@ -256,7 +256,7 @@ namespace DiplomaApp.Migrations
                     b.ToTable("Offer");
                 });
 
-            modelBuilder.Entity("DiplomaApp.Models.OfferPage", b =>
+            modelBuilder.Entity("DiplomaApp.Models.OfferMap", b =>
                 {
                     b.Property<int>("MarketplaceId")
                         .HasColumnType("int");
@@ -275,7 +275,7 @@ namespace DiplomaApp.Migrations
 
                     b.HasKey("MarketplaceId");
 
-                    b.ToTable("OfferPage");
+                    b.ToTable("OfferMap");
                 });
 
             modelBuilder.Entity("DiplomaApp.Models.OfferPrice", b =>
@@ -292,6 +292,89 @@ namespace DiplomaApp.Migrations
                     b.HasKey("OfferId", "CheckDate");
 
                     b.ToTable("OfferPrice");
+                });
+
+            modelBuilder.Entity("DiplomaApp.Models.Request", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<DateTime>("CreationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Theme")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Request");
+                });
+
+            modelBuilder.Entity("DiplomaApp.Models.RequestRequestStatus", b =>
+                {
+                    b.Property<int>("RequestId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RequestStatusId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreationDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("RequestId", "RequestStatusId", "CreationDate");
+
+                    b.HasIndex("RequestStatusId");
+
+                    b.ToTable("RequestRequestStatus");
+                });
+
+            modelBuilder.Entity("DiplomaApp.Models.RequestStatus", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("RequestStatus");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "",
+                            Name = "Ожидает"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "",
+                            Name = "В обработке"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Description = "",
+                            Name = "Отклонено"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -319,6 +402,14 @@ namespace DiplomaApp.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "1",
+                            ConcurrencyStamp = "31d88389-1ee3-4d8f-bb60-e8956290c1e8",
+                            Name = "Administrator"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -431,11 +522,11 @@ namespace DiplomaApp.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("DiplomaApp.Models.CatalogPage", b =>
+            modelBuilder.Entity("DiplomaApp.Models.CatalogMap", b =>
                 {
                     b.HasOne("DiplomaApp.Models.Marketplace", "Marketplace")
-                        .WithOne("CatalogPage")
-                        .HasForeignKey("DiplomaApp.Models.CatalogPage", "MarketplaceId")
+                        .WithOne("CatalogMap")
+                        .HasForeignKey("DiplomaApp.Models.CatalogMap", "MarketplaceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -453,11 +544,11 @@ namespace DiplomaApp.Migrations
                     b.Navigation("Marketplace");
                 });
 
-            modelBuilder.Entity("DiplomaApp.Models.CategoryPage", b =>
+            modelBuilder.Entity("DiplomaApp.Models.CategoryMap", b =>
                 {
                     b.HasOne("DiplomaApp.Models.Marketplace", "Marketplace")
-                        .WithOne("CategoryPage")
-                        .HasForeignKey("DiplomaApp.Models.CategoryPage", "MarketplaceId")
+                        .WithOne("CategoryMap")
+                        .HasForeignKey("DiplomaApp.Models.CategoryMap", "MarketplaceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -475,11 +566,11 @@ namespace DiplomaApp.Migrations
                     b.Navigation("Category");
                 });
 
-            modelBuilder.Entity("DiplomaApp.Models.OfferPage", b =>
+            modelBuilder.Entity("DiplomaApp.Models.OfferMap", b =>
                 {
                     b.HasOne("DiplomaApp.Models.Marketplace", "Marketplace")
-                        .WithOne("OfferPage")
-                        .HasForeignKey("DiplomaApp.Models.OfferPage", "MarketplaceId")
+                        .WithOne("OfferMap")
+                        .HasForeignKey("DiplomaApp.Models.OfferMap", "MarketplaceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -495,6 +586,25 @@ namespace DiplomaApp.Migrations
                         .IsRequired();
 
                     b.Navigation("Offer");
+                });
+
+            modelBuilder.Entity("DiplomaApp.Models.RequestRequestStatus", b =>
+                {
+                    b.HasOne("DiplomaApp.Models.Request", "Request")
+                        .WithMany("RequestStatuses")
+                        .HasForeignKey("RequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DiplomaApp.Models.RequestStatus", "RequestStatus")
+                        .WithMany("RequestStatuses")
+                        .HasForeignKey("RequestStatusId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Request");
+
+                    b.Navigation("RequestStatus");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -555,21 +665,31 @@ namespace DiplomaApp.Migrations
 
             modelBuilder.Entity("DiplomaApp.Models.Marketplace", b =>
                 {
-                    b.Navigation("CatalogPage")
+                    b.Navigation("CatalogMap")
                         .IsRequired();
 
                     b.Navigation("Categories");
 
-                    b.Navigation("CategoryPage")
+                    b.Navigation("CategoryMap")
                         .IsRequired();
 
-                    b.Navigation("OfferPage")
+                    b.Navigation("OfferMap")
                         .IsRequired();
                 });
 
             modelBuilder.Entity("DiplomaApp.Models.Offer", b =>
                 {
                     b.Navigation("OfferPrices");
+                });
+
+            modelBuilder.Entity("DiplomaApp.Models.Request", b =>
+                {
+                    b.Navigation("RequestStatuses");
+                });
+
+            modelBuilder.Entity("DiplomaApp.Models.RequestStatus", b =>
+                {
+                    b.Navigation("RequestStatuses");
                 });
 #pragma warning restore 612, 618
         }

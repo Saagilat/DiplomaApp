@@ -1,11 +1,12 @@
-﻿@model X.PagedList.IPagedList<DiplomaApp.ViewModels.CategoryIndex>
+﻿@model DiplomaApp.ViewModels.CategoryIndex
 
 @{
     ViewData["Title"] = "Категории";
 }
 
-<h1>@ViewData["Title"]</h1>
-
 <div>
-    @{ Html.RenderPartial("~/Views/Categories/PartialRender/IndexTable.cshtml", Model); }
+    <h1>@ViewData["Title"]</h1>
+    <div>
+        @{ Html.RenderPartial("~/Views/Categories/PartialRender/IndexTable.cshtml", Model.Categories); }
+    </div>
 </div>

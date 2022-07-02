@@ -4,6 +4,7 @@ using DiplomaApp.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DiplomaApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220701020056_v102")]
+    partial class v102
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -92,6 +94,10 @@ namespace DiplomaApp.Migrations
                     b.Property<int>("MarketplaceId")
                         .HasColumnType("int");
 
+                    b.Property<string>("AttributeUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("CheckDate")
                         .HasColumnType("datetime");
 
@@ -156,6 +162,14 @@ namespace DiplomaApp.Migrations
                 {
                     b.Property<int>("MarketplaceId")
                         .HasColumnType("int");
+
+                    b.Property<string>("AttributeNextPageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AttributeUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UrlMarketplace")
                         .IsRequired()
@@ -399,7 +413,7 @@ namespace DiplomaApp.Migrations
                         new
                         {
                             Id = "1",
-                            ConcurrencyStamp = "f286cda9-731e-4892-b7b2-85328569fa53",
+                            ConcurrencyStamp = "c811baed-e7a0-4109-b11e-327b6b9333e3",
                             Name = "Administrator"
                         });
                 });

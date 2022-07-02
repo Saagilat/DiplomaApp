@@ -1,20 +1,20 @@
 ﻿@using DiplomaApp.Core
-@model IEnumerable<DiplomaApp.Models.Marketplace>
+@model DiplomaApp.ViewModels.MarketplaceIndex
 
 @{
     ViewData["Title"] = "Маркетплейсы";
 }
 
-<h1>@ViewData["Title"]</h1>
-
-@if (User.IsInRole(Constants.administrator))
-{
-    <div class="row">
-        <a asp-action="Create">Добавить</a>
-        <a asp-action="GetOffersAllMarketplaces">Обновить все маркетплейсы</a>
-    </div>
-}
-
 <div>
-    @{ Html.RenderPartial("~/Views/Marketplaces/PartialRender/IndexTable.cshtml", Model); }
+    <h1>@ViewData["Title"]</h1>
+    @if (User.IsInRole(Constants.administrator))
+    {
+        <div class="btn-group">
+            <a class="btn btn-outline-primary form-control h-50 w-auto" asp-action="Create">Добавить маркетплейс</a>
+            <a class="btn btn-outline-primary form-control h-50 w-auto" asp-action="GetOffersAllMarketplaces">Обновить все маркетплейсы</a>
+        </div>
+    }
+    <div class="mt-3">
+        @{ Html.RenderPartial("~/Views/Marketplaces/PartialRender/IndexTable.cshtml", Model.Marketplaces); }
+    </div>
 </div>

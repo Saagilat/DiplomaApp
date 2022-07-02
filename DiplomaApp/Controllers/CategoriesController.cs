@@ -42,13 +42,13 @@ namespace DiplomaApp.Controllers
             {
                 categories = categories.Where(c => _context.Marketplace.Find(c.MarketplaceId).Name.ToLower().Contains(marketplace.ToLower()));
             }
-            List<CategoryIndex> categoryIndexes = new List<CategoryIndex>();
+            List<CategoryViewModel> categoriesVM = new List<CategoryViewModel>();
             foreach(var category in categories)
             {
-                var categoryMarketplace = _context.Marketplace.Find(category.MarketplaceId);
-                categoryIndexes.Add(new CategoryIndex() { Category = category, MarketplaceName = categoryMarketplace.Name, MarketplaceUrl = categoryMarketplace.Url });
+                var categoryMarketplace = _context.Marketplace.Find(category.MarketplaceId); 
+                categoriesVM.Add(new CategoryViewModel(category, categoryMarketplace));
             }
-            var viewModel = categoryIndexes.ToPagedList(page, Constants.recordsPerPage);
+            var viewModel = new CategoryIndex(categoriesVM.ToPagedList(page, Constants.recordsPerPage));
             return View(viewModel);
         }
         // GET: Categories/Details/5
@@ -64,13 +64,7 @@ namespace DiplomaApp.Controllers
             {
                 return NotFound();
             }
-            var viewModel = new CategoryDetails();
             var offers = _context.Offer.Where(c => c.CategoryId == id).AsEnumerable();
-            if (offers.Any())
-            {
-                ViewData["MinPrice"] = offers.Min(c => c.Price);
-                ViewData["MaxPrice"] = offers.Max(c => c.Price);
-            }
             if (maxPrice != 0)
             {
                 offers = offers.Where(c => (c.Price <= maxPrice));
@@ -108,15 +102,14 @@ namespace DiplomaApp.Controllers
                     break;
 
             }
-            List<OfferIndex> offerIndexes = new List<OfferIndex>();
-            foreach (var item in offers)
+            var categoryMarketplace = _context.Marketplace.Find(category.MarketplaceId);
+            var categoryVM = new CategoryViewModel(category, categoryMarketplace);
+            var offersVM = new List<OfferViewModel>();
+            foreach(var offer in offers)
             {
-                offerIndexes.Add(new OfferIndex { Offer = item, CategoryName = _context.Category.Find(item.CategoryId).Name, MarketplaceName = _context.Marketplace.Find(_context.Category.Find(item.CategoryId).MarketplaceId).Name });
+                offersVM.Add(new OfferViewModel(offer, categoryMarketplace, category));
             }
-            viewModel.Category = category;
-            viewModel.MarketplaceName = _context.Marketplace.Find(category.MarketplaceId).Name;
-            viewModel.MarketplaceUrl = _context.Marketplace.Find(category.MarketplaceId).Url;
-            viewModel.Offers = offerIndexes.ToPagedList(page, Constants.recordsPerPage);
+            var viewModel = new CategoryDetails(categoryVM, offersVM.ToPagedList(page, Constants.recordsPerPage));
 
             return View(viewModel);
         }

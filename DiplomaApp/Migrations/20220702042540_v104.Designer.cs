@@ -4,6 +4,7 @@ using DiplomaApp.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DiplomaApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220702042540_v104")]
+    partial class v104
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -399,7 +401,7 @@ namespace DiplomaApp.Migrations
                         new
                         {
                             Id = "1",
-                            ConcurrencyStamp = "f286cda9-731e-4892-b7b2-85328569fa53",
+                            ConcurrencyStamp = "5e76cee0-48f0-45d5-8e92-1d886fa6008b",
                             Name = "Administrator"
                         });
                 });
