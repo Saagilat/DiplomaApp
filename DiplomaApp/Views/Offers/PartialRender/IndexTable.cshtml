@@ -1,4 +1,4 @@
-﻿@model X.PagedList.PagedList<DiplomaApp.ViewModels.OfferIndex>
+﻿@model X.PagedList.PagedList<DiplomaApp.ViewModels.OfferViewModel>
 @using X.PagedList.Mvc.Core;
 
 @{
@@ -9,7 +9,7 @@
         var currentMarketplace = query["marketplace"].ToString() == "" ? ViewData["Marketplace"] : query["marketplace"];
         var currentName = query["name"].ToString() == "" ? ViewData["Name"] : query["name"];
 }
-<div class="container">
+<div>
     <form>
         <div class="row">
             <div class="col">
@@ -68,9 +68,6 @@
                     Цена
                 </th>
                 <th>
-                    Дата проверки
-                </th>
-                <th>
                     URL
                 </th>
             </tr>
@@ -82,7 +79,7 @@
                 {
                     <tr>
                         <td>
-                            <a asp-controller="Offers" asp-action="Details" asp-route-id="@item.Offer.Id">@Html.DisplayFor(modelItem => item.Offer.Name)</a>
+                            <a asp-controller="Offers" asp-action="Details" asp-route-id="@item.Id">@Html.DisplayFor(modelItem => item.Name)</a>
                         </td>
                         <td>
                             <a asp-controller="Offers" asp-action="Index" asp-route-category="@item.CategoryName">@Html.DisplayFor(modelItem => item.CategoryName)</a>
@@ -91,13 +88,10 @@
                             <a asp-controller="Offers" asp-action="Index" asp-route-marketplace="@item.MarketplaceName">@Html.DisplayFor(modelItem => item.MarketplaceName)</a>
                         </td>
                         <td>
-                            @Html.DisplayFor(modelItem => item.Offer.Price)
+                            @Html.DisplayFor(modelItem => item.Price)
                         </td>
                         <td>
-                            <div class="date">@item.Offer.CheckDate.ToString("yyyy-MM-dd HH:mm:ss")</div>
-                        </td>
-                        <td>
-                            <a href=@item.Offer.Url>@Html.DisplayFor(modelItem => item.Offer.Url)</a>
+                            <a href=@item.Url>@Html.DisplayFor(modelItem => item.Url)</a>
                         </td>
                     </tr>
                 }

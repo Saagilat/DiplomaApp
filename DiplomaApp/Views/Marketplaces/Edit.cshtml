@@ -4,25 +4,38 @@
     ViewData["Title"] = "Изменить";
 }
 
-<h1>@ViewData["Title"]</h1>
-
-<h4>Marketplace</h4>
-<hr />
+<h1>@ViewData["Title"] маркетплейс: @Model.Marketplace.Name</h1>
 <div class="row">
-    <div class="col-md-4">
+    <div>
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            
-            @{ Html.RenderPartial("~/Views/Marketplaces/PartialRender/EditForm.cshtml", Model); }
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+            <div>
+                <h3>Маркетплейс</h3>
+                @Html.DisplayNameFor(model => model.Marketplace.Id)
+                @Html.EditorFor(model => model.Marketplace.Id, new { htmlAttributes = new { @class = "form-control", @readonly="true"} })
+                @Html.DisplayNameFor(model => model.Marketplace.Name)
+                @Html.EditorFor(model => model.Marketplace.Name, new { htmlAttributes = new { @class = "form-control"} })
+                @Html.DisplayNameFor(model => model.Marketplace.Url)
+                @Html.EditorFor(model => model.Marketplace.Url, new { htmlAttributes = new { @class = "form-control"} })
+            </div>
+            <div>
+                <h3>Карта парсинга каталога</h3>
+                @Html.EditorFor(model => model.CatalogMap, new { htmlAttributes = new { @class = "form-control"} })
+            </div>
+            <div>
+                <h3>Карта парсинга категории</h3>
+                @Html.EditorFor(model => model.CategoryMap, new { htmlAttributes = new { @class = "form-control"} })
+            </div>
+            <div>
+                <h3>Карта парсинга товара</h3>
+                @Html.EditorFor(model => model.OfferMap, new { htmlAttributes = new { @class = "form-control"} })
+            </div>
+            <div class="mt-3">
+                <input type="submit" value="Сохранить" class="btn btn-primary form-control" />
+                <a asp-action="Index" class="btn btn-primary form-control mt-2 text-center">Назад к списку</a>
             </div>
         </form>
     </div>
-</div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
 </div>
 
 @section Scripts {

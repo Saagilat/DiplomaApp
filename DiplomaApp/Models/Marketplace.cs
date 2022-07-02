@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DiplomaApp.Models
@@ -6,75 +7,55 @@ namespace DiplomaApp.Models
     public class Marketplace
     {
         public int Id { get; set; }
-        [Display(Name = "Название маркетплейса")]
         public string Name { get; set; }
-        [Display(Name = "URL маркетплейса")]
         public string Url { get; set; }
-        public CatalogPage CatalogPage { get; set; }
-        public CategoryPage CategoryPage { get; set; }
-        public OfferPage OfferPage { get; set; }
+        public CatalogMap CatalogMap { get; set; }
+        public CategoryMap CategoryMap { get; set; }
+        public OfferMap OfferMap { get; set; }
 
         public ICollection<Category> Categories = new List<Category>();
         public Marketplace()
         {
         }
     }
-    public class CatalogPage
+    public class CatalogMap
     {
         public Marketplace Marketplace { get; set; }
         public int MarketplaceId { get; set; }
-        [Display(Name = "URL каталога")]
         public string UrlMarketplace { get; set; }
         public string Url { get; set; }
-        [Display(Name = "XPathCategories каталога")]
         public string XPathCategories { get; set; }
-        [Display(Name = "XPathUrl каталога")]
         public string XPathUrl { get; set; }
-        [Display(Name = "AttributeUrl каталога")]
-        public string AttributeUrl { get; set; }
-        [Display(Name = "XPathName каталога")]
         public string XPathName { get; set; }
         public DateTime CheckDate { get; set; }
-        public CatalogPage()
+        public CatalogMap()
         {
 
         }
     }
-    public class CategoryPage
+    public class CategoryMap
     {
         public Marketplace Marketplace { get; set; }
         public int MarketplaceId { get; set; }
-        [Display(Name = "URL категории")]
         public string UrlMarketplace { get; set; }
-        [Display(Name = "XPathOffers категории")]
         public string XPathOffers { get; set; }
-        [Display(Name = "XPathUrl категории")]
         public string XPathUrl { get; set; }
-        [Display(Name = "AttributeUrl категории")]
-        public string AttributeUrl { get; set; }
-        [Display(Name = "XPathName категории")]
         public string XPathName { get; set; }
-        [Display(Name = "XPathPrice категории")]
         public string XPathPrice { get; set; }
-        [Display(Name = "XPathNextPageUrl категории")]
         public string XPathNextPageUrl { get; set; }
-        [Display(Name = "AttributeNextPageUrl категории")]
-        public string AttributeNextPageUrl { get; set; }
-        public CategoryPage()
+        public CategoryMap()
         {
 
         }
     }
-    public class OfferPage
+    public class OfferMap
     {
         public Marketplace Marketplace { get; set; }
         public int MarketplaceId { get; set; }
         public string UrlMarketplace { get; set; }
-        [Display(Name = "XPathName товара")]
         public string XPathName { get; set; }
-        [Display(Name = "XPathPrice товара")]
         public string XPathPrice { get; set; }
-        public OfferPage()
+        public OfferMap()
         {
 
         }

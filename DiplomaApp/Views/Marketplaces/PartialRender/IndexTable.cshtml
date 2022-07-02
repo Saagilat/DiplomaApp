@@ -1,13 +1,13 @@
-﻿@model X.PagedList.PagedList<DiplomaApp.Models.Marketplace>
+﻿@model X.PagedList.PagedList<DiplomaApp.ViewModels.MarketplaceViewModel>
 @using X.PagedList.Mvc.Core;
 @{
         var query = Context.Request.Query;
         var currentName = query["name"].ToString() == "" ? ViewData["Name"] : query["name"];
 }
 
-<div class="mt-3 mb-3">
+<div>
     <form>
-        <input type="text" class="form-control mt-3" id="name" name="name" value="@currentName" placeholder="Марктеплейс">
+        <input type="text" class="form-control" id="name" name="name" value="@currentName" placeholder="Марктеплейс">
         <input class="form-control mt-3" type="submit" value="Найти" />
     </form>
     <div class="mt-3">

@@ -1,0 +1,54 @@
+﻿@using DiplomaApp.Core
+@model DiplomaApp.ViewModels.RequestIndex
+
+@{
+    ViewData["Title"] = "Заявки для администрации";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="btn-group">
+    <a class="btn btn-outline-primary form-control h-50 w-auto" asp-controller="Requests" asp-action="Create">Оставить заявку</a>
+</div>
+
+<table class="table table-striped">
+        <thead>
+            <tr>
+                <th>
+                    Тема
+                </th>
+                <th>
+                    Статус
+                </th>
+                <th>
+                    Дата подачи
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+        @if (Model != null)
+            {
+                foreach (var item in Model.Requests)
+                {
+                    <tr>
+                        <td>
+                         @if (User.IsInRole(Constants.administrator))
+                        {
+                            <a asp-controller="Requests" asp-action="ChangeStatus" asp-route-id="@item.Id">@item.Theme</a>
+                        }
+                        else
+                        {
+                            @item.Theme
+                        }
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Status.Name)
+                        </td>
+                        <td>
+                            <div class="date">@Html.DisplayFor(modelItem => item.CreationDate)</div>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>

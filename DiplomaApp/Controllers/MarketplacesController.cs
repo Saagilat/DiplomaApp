@@ -38,9 +38,13 @@ namespace DiplomaApp.Controllers
             {
                 marketplaces = marketplaces.Where(c => (c.Name.ToLower().Contains(name.ToLower())));
             }
-
-            var marketplacesPage = marketplaces.ToPagedList(page, Constants.recordsPerPage);
-            return View(marketplacesPage);
+            List<MarketplaceViewModel> marketplacesVM = new List<MarketplaceViewModel>();
+            foreach (var marketplace in marketplaces)
+            {
+                marketplacesVM.Add(new MarketplaceViewModel(marketplace));
+            }
+            var viewModel = new MarketplaceIndex(marketplacesVM.ToPagedList(page, Constants.recordsPerPage));
+            return View(viewModel);
         }
 
         // GET: Marketplaces/Details/5
@@ -56,23 +60,18 @@ namespace DiplomaApp.Controllers
             {
                 return NotFound();
             }
-            MarketplaceDetails viewModel = new MarketplaceDetails();
-            ViewData["Marketplace"] = marketplace.Name;
-
-            viewModel.Marketplace = marketplace;
             var categories = _context.Category.Where(c => c.MarketplaceId == id).AsEnumerable();
             if (!String.IsNullOrEmpty(name))
             {
                 categories = categories.Where(c => c.Name.ToLower().Contains(name.ToLower()));
             }
-
-            List<CategoryIndex> categoryIndexes = new List<CategoryIndex>();
+            var marketplaceVM = new MarketplaceViewModel(marketplace);
+            List<CategoryViewModel> categoriesVM = new List<CategoryViewModel>();
             foreach (var category in categories)
-            {;
-                categoryIndexes.Add(new CategoryIndex() { Category = category, MarketplaceName = marketplace.Name, MarketplaceUrl = marketplace.Url });
+            {
+                categoriesVM.Add(new CategoryViewModel(category, marketplace));
             }
-            viewModel.Categories = categoryIndexes.ToPagedList(page, Constants.recordsPerPage);
-
+            var viewModel = new MarketplaceDetails(marketplaceVM, categoriesVM.ToPagedList(page, Constants.recordsPerPage)); 
             return View(viewModel);
 
         }
@@ -94,43 +93,40 @@ namespace DiplomaApp.Controllers
 
             if (ModelState.IsValid)
             {
-                var marketplace = new Marketplace() { Name = marketplaceEdit.MarketplaceName, Url = marketplaceEdit.MarketplaceUrl };
-                var catalogPage = new CatalogPage()
+                var marketplace = new Marketplace() { Name = marketplaceEdit.Marketplace.Name, Url = marketplaceEdit.Marketplace.Url };
+                var CatalogMap = new CatalogMap()
                 {
-                    Url = marketplaceEdit.CatalogPageUrl,
-                    UrlMarketplace = marketplaceEdit.MarketplaceUrl,
-                    XPathCategories = marketplaceEdit.CatalogPageXPathCategories,
-                    XPathUrl = marketplaceEdit.CatalogPageXPathUrl,
-                    AttributeUrl = marketplaceEdit.CatalogPageAttributeUrl,
-                    XPathName = marketplaceEdit.CatalogPageXPathName,
+                    Url = marketplaceEdit.CatalogMap.Url,
+                    UrlMarketplace = marketplaceEdit.Marketplace.Url,
+                    XPathCategories = marketplaceEdit.CatalogMap.XPathCategories,
+                    XPathUrl = marketplaceEdit.CatalogMap.XPathUrl,
+                    XPathName = marketplaceEdit.CatalogMap.XPathName,
                     CheckDate = DateTime.UtcNow
                 };
-                var categoryPage = new CategoryPage()
+                var CategoryMap = new CategoryMap()
                 {
-                    UrlMarketplace = marketplaceEdit.MarketplaceUrl,
-                    XPathOffers = marketplaceEdit.CategoryPageXPathOffers,
-                    XPathUrl = marketplaceEdit.CategoryPageXPathUrl,
-                    AttributeUrl = marketplaceEdit.CategoryPageAttributeUrl,
-                    XPathName = marketplaceEdit.CategoryPageXPathName,
-                    XPathPrice = marketplaceEdit.CategoryPageXPathPrice,
-                    XPathNextPageUrl = marketplaceEdit.CategoryPageXPathNextPageUrl,
-                    AttributeNextPageUrl = marketplaceEdit.CategoryPageAttributeNextPageUrl,
+                    UrlMarketplace = marketplaceEdit.Marketplace.Url,
+                    XPathOffers = marketplaceEdit.CategoryMap.XPathOffers,
+                    XPathUrl = marketplaceEdit.CategoryMap.XPathUrl,
+                    XPathName = marketplaceEdit.CategoryMap.XPathName,
+                    XPathPrice = marketplaceEdit.CategoryMap.XPathPrice,
+                    XPathNextPageUrl = marketplaceEdit.CategoryMap.XPathNextPageUrl,
                 };
-                var offerPage = new OfferPage()
+                var OfferMap = new OfferMap()
                 {
-                    UrlMarketplace = marketplaceEdit.MarketplaceUrl,
-                    XPathName = marketplaceEdit.OfferPageXPathName,
-                    XPathPrice = marketplaceEdit.OfferPageXPathPrice,
+                    UrlMarketplace = marketplaceEdit.Marketplace.Url,
+                    XPathName = marketplaceEdit.OfferMap.XPathName,
+                    XPathPrice = marketplaceEdit.OfferMap.XPathPrice,
                 };
 
                 _context.Add(marketplace);
                 await _context.SaveChangesAsync();
-                catalogPage.MarketplaceId = marketplace.Id;
-                categoryPage.MarketplaceId = marketplace.Id;
-                offerPage.MarketplaceId = marketplace.Id;
-                _context.Add(catalogPage);
-                _context.Add(categoryPage);
-                _context.Add(offerPage);
+                CatalogMap.MarketplaceId = marketplace.Id;
+                CategoryMap.MarketplaceId = marketplace.Id;
+                OfferMap.MarketplaceId = marketplace.Id;
+                _context.Add(CatalogMap);
+                _context.Add(CategoryMap);
+                _context.Add(OfferMap);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
@@ -146,40 +142,17 @@ namespace DiplomaApp.Controllers
                 return NotFound();
             }
             var marketplace = _context.Marketplace.FirstOrDefault(c => c.Id == id);
-            var catalogPage = _context.CatalogPage.FirstOrDefault(c => c.MarketplaceId == id);
-            var categoryPage = _context.CategoryPage.FirstOrDefault(c => c.MarketplaceId == id);
-            var offerPage = _context.OfferPage.FirstOrDefault(c => c.MarketplaceId == id);
 
             if (marketplace == null)
             {
                 return NotFound();
             }
-            MarketplaceEdit viewModel = new MarketplaceEdit();
-            viewModel.MarketplaceUrl = marketplace.Url;
-            viewModel.MarketplaceName = marketplace.Name;
-            if (catalogPage != null)
-            {
-                viewModel.CatalogPageUrl = catalogPage.Url;
-                viewModel.CatalogPageXPathCategories = catalogPage.XPathCategories;
-                viewModel.CatalogPageXPathUrl = catalogPage.XPathUrl;
-                viewModel.CatalogPageAttributeUrl = catalogPage.AttributeUrl;
-                viewModel.CatalogPageXPathName = catalogPage.XPathName;
-            }
-            if (categoryPage != null)
-            {
-                viewModel.CategoryPageXPathOffers = categoryPage.XPathOffers;
-                viewModel.CategoryPageXPathUrl = categoryPage.XPathUrl;
-                viewModel.CategoryPageAttributeUrl = categoryPage.AttributeUrl;
-                viewModel.CategoryPageXPathName = categoryPage.XPathName;
-                viewModel.CategoryPageXPathPrice = categoryPage.XPathPrice;
-                viewModel.CategoryPageXPathNextPageUrl = categoryPage.XPathNextPageUrl;
-                viewModel.CategoryPageAttributeNextPageUrl = categoryPage.AttributeNextPageUrl;
-            }
-            if (offerPage != null)
-            {
-                viewModel.OfferPageXPathName = offerPage.XPathName;
-                viewModel.OfferPageXPathPrice = offerPage.XPathPrice;
-            }
+            var marketplaceVM = new MarketplaceViewModel(marketplace);
+            var catalogMapVM = new CatalogMapViewModel(_context.CatalogMap.FirstOrDefault(c => c.MarketplaceId == id));
+            var categoryMapVM = new CategoryMapViewModel(_context.CategoryMap.FirstOrDefault(c => c.MarketplaceId == id));
+            var offerMapVM = new OfferMapViewModel(_context.OfferMap.FirstOrDefault(c => c.MarketplaceId == id));
+
+            MarketplaceEdit viewModel = new MarketplaceEdit(marketplaceVM, catalogMapVM, categoryMapVM, offerMapVM);
             return View(viewModel);
         }
 
@@ -193,42 +166,39 @@ namespace DiplomaApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                var marketplace = new Marketplace() { Id = id, Name = marketplaceEdit.MarketplaceName, Url = marketplaceEdit.MarketplaceUrl };
-                var catalogPage = new CatalogPage()
+                var marketplace = new Marketplace() { Id = id, Name = marketplaceEdit.Marketplace.Name, Url = marketplaceEdit.Marketplace.Url };
+                var CatalogMap = new CatalogMap()
                 {
                     MarketplaceId = id,
-                    UrlMarketplace = marketplaceEdit.MarketplaceUrl,
-                    Url = marketplaceEdit.CatalogPageUrl,
-                    XPathCategories = marketplaceEdit.CatalogPageXPathCategories,
-                    XPathUrl = marketplaceEdit.CatalogPageXPathUrl,
-                    AttributeUrl = marketplaceEdit.CatalogPageAttributeUrl,
-                    XPathName = marketplaceEdit.CatalogPageXPathName,
+                    UrlMarketplace = marketplaceEdit.Marketplace.Url,
+                    Url = marketplaceEdit.CatalogMap.Url,
+                    XPathCategories = marketplaceEdit.CatalogMap.XPathCategories,
+                    XPathUrl = marketplaceEdit.CatalogMap.XPathUrl,
+                    XPathName = marketplaceEdit.CatalogMap.XPathName,
                     CheckDate = DateTime.UtcNow
                 };
-                var categoryPage = new CategoryPage()
+                var CategoryMap = new CategoryMap()
                 {
                     MarketplaceId = id,
-                    UrlMarketplace = marketplaceEdit.MarketplaceUrl,
-                    XPathOffers = marketplaceEdit.CategoryPageXPathOffers,
-                    XPathUrl = marketplaceEdit.CategoryPageXPathUrl,
-                    AttributeUrl = marketplaceEdit.CategoryPageAttributeUrl,
-                    XPathName = marketplaceEdit.CategoryPageXPathName,
-                    XPathPrice = marketplaceEdit.CategoryPageXPathPrice,
-                    XPathNextPageUrl = marketplaceEdit.CategoryPageXPathNextPageUrl,
-                    AttributeNextPageUrl = marketplaceEdit.CategoryPageAttributeNextPageUrl,
+                    UrlMarketplace = marketplaceEdit.Marketplace.Url,
+                    XPathOffers = marketplaceEdit.CategoryMap.XPathOffers,
+                    XPathUrl = marketplaceEdit.CategoryMap.XPathUrl,
+                    XPathName = marketplaceEdit.CategoryMap.XPathName,
+                    XPathPrice = marketplaceEdit.CategoryMap.XPathPrice,
+                    XPathNextPageUrl = marketplaceEdit.CategoryMap.XPathNextPageUrl,
                 };
-                var offerPage = new OfferPage()
+                var OfferMap = new OfferMap()
                 {
                     MarketplaceId = id,
-                    UrlMarketplace = marketplaceEdit.MarketplaceUrl,
-                    XPathName = marketplaceEdit.OfferPageXPathName,
-                    XPathPrice = marketplaceEdit.OfferPageXPathPrice,
+                    UrlMarketplace = marketplaceEdit.Marketplace.Url,
+                    XPathName = marketplaceEdit.OfferMap.XPathName,
+                    XPathPrice = marketplaceEdit.OfferMap.XPathPrice,
                 };
                 
                 _context.Update(marketplace);
-                _context.Update(catalogPage);
-                _context.Update(categoryPage);
-                _context.Update(offerPage);
+                _context.Update(CatalogMap);
+                _context.Update(CategoryMap);
+                _context.Update(OfferMap);
                 await _context.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
@@ -250,8 +220,13 @@ namespace DiplomaApp.Controllers
             {
                 return NotFound();
             }
+            var marketplaceVM = new MarketplaceViewModel(marketplace);
+            var catalogMapVM = new CatalogMapViewModel(_context.CatalogMap.FirstOrDefault(c => c.MarketplaceId == id));
+            var categoryMapVM = new CategoryMapViewModel(_context.CategoryMap.FirstOrDefault(c => c.MarketplaceId == id));
+            var offerMapVM = new OfferMapViewModel(_context.OfferMap.FirstOrDefault(c => c.MarketplaceId == id));
 
-            return View(marketplace);
+            MarketplaceDelete viewModel = new MarketplaceDelete(marketplaceVM, catalogMapVM, categoryMapVM, offerMapVM);
+            return View(viewModel);
         }
 
         // POST: Marketplaces/Delete/5
@@ -273,6 +248,7 @@ namespace DiplomaApp.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
+
         [Authorize(Roles = Constants.administrator)]
         public async Task<IActionResult> GetCategoryOffers(int id, DateTime? startDateTime = null)
         {
@@ -288,7 +264,7 @@ namespace DiplomaApp.Controllers
 
             Category category = _context.Category.Find(id);
             Marketplace marketplace = _context.Marketplace.Find(category.MarketplaceId);
-            var categoryPage = _context.CategoryPage.Find(marketplace.Id);
+            var CategoryMap = _context.CategoryMap.Find(marketplace.Id);
             string pageUrl;
 
             Console.WriteLine("Category LastParsedPageUrl = " + category.LastParsedPageUrl);
@@ -305,7 +281,7 @@ namespace DiplomaApp.Controllers
             while (!String.IsNullOrEmpty(pageUrl) && pageUrl.Contains(category.Url) && ((DateTime.UtcNow - startDateTime.Value).TotalSeconds < Constants.parseTimeoutSeconds))
             {
                 Console.WriteLine(pageUrl);
-                var scrapeResult = await ScrapeCategoryPage(pageUrl, categoryPage, Constants.minWaitMilliseconds, Constants.maxWaitMilliseconds);
+                var scrapeResult = await ScrapeCategoryMap(pageUrl, CategoryMap, Constants.minWaitMilliseconds, Constants.maxWaitMilliseconds);
                 foreach (var parsedOffer in scrapeResult.Offers)
                 {
                     if (_context.Offer.Any(c => c.Url == parsedOffer.Url))
@@ -333,19 +309,12 @@ namespace DiplomaApp.Controllers
                         }
                     }
                 }
-                pageUrl = scrapeResult.NextPageUrl;
+                pageUrl = pageUrl == scrapeResult.NextPageUrl? "" : scrapeResult.NextPageUrl;
                 category.LastParsedPageUrl = pageUrl;
-                try
-                {
-                    _context.SaveChanges();
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex);
-                }
+                await _context.SaveChangesAsync();
             }
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return RedirectToAction("Details", "Categories", new { id = id });
         }
@@ -367,7 +336,7 @@ namespace DiplomaApp.Controllers
             var categories = _context.Category.AsEnumerable()
                 .Where(c => c.MarketplaceId == id);
             int iterator = 0;
-            CategoryPageScrapeResult scrapeResult = new CategoryPageScrapeResult();
+            CategoryMapScrapeResult scrapeResult = new CategoryMapScrapeResult();
             scrapeResult.ResponseSuccesful = true;
             while ((iterator < categories.Count()) && ((DateTime.UtcNow - startDateTime.Value).TotalSeconds < Constants.parseTimeoutSeconds) && scrapeResult.ResponseSuccesful)
             {
@@ -386,9 +355,9 @@ namespace DiplomaApp.Controllers
             }
 
             var marketplace = _context.Marketplace.Find(id);
-            var catalogPage = _context.CatalogPage.Find(id);
+            var CatalogMap = _context.CatalogMap.Find(id);
 
-            CatalogPageScrapeResult scrapeResult = await Crawler.ScrapeCatalogPage(catalogPage);
+            CatalogMapScrapeResult scrapeResult = await ScrapeCatalogMap(CatalogMap);
 
             if (scrapeResult.ResponseSuccesful && scrapeResult.Categories != null)
             {

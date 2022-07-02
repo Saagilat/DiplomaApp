@@ -2,6 +2,7 @@ using DiplomaApp.Data;
 using DiplomaApp.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using DiplomaApp;
 
 var builder = WebApplication.CreateBuilder(args);
 
